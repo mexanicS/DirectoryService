@@ -21,7 +21,8 @@ public sealed class Department
         DepartmentId departmentId,
         DepartmentName name, 
         Identifier identifier, 
-        Path path)
+        Path path,
+        IEnumerable<DepartmentLocation> departmentLocations)
     {
         Id = departmentId;
         Name = name;
@@ -29,6 +30,7 @@ public sealed class Department
         Path = path;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
+        _departmentLocations = departmentLocations.ToList();
     }
      public DepartmentId Id { get; private set; }
      
@@ -58,8 +60,9 @@ public sealed class Department
          DepartmentId departmentId,
          DepartmentName name, 
          Identifier identifier, 
-         Path path)
+         Path path,
+         IEnumerable<DepartmentLocation> departmentLocations)
      {
-         return new Department(departmentId, name, identifier, path);
+         return new Department(departmentId, name, identifier, path, departmentLocations);
      }
 }

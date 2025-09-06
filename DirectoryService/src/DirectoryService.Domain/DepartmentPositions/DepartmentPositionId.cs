@@ -1,6 +1,3 @@
 ﻿namespace DirectoryService.Domain.DepartmentPositions;
 
-public record DepartmentPositionId
-{
-    
-}
+public record DepartmentPositionId(Guid Value);
