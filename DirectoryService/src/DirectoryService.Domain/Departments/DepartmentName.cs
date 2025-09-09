@@ -10,7 +10,7 @@ public record DepartmentName
     
     public string Value { get; }
     
-    private DepartmentName(string value)
+    public DepartmentName(string value)
     { 
          Value = value;
     }
@@ -24,5 +24,12 @@ public record DepartmentName
             return "DepartmentName name is invalid";
         }
         return new DepartmentName(value);
+    }
+    
+    public static implicit operator string(DepartmentName departmentName)
+    {
+        ArgumentNullException.ThrowIfNull(departmentName);
+        
+        return departmentName.Value;
     }
 }
