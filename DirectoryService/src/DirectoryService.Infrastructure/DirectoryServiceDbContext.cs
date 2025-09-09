@@ -41,7 +41,6 @@ public class DirectoryServiceDbContext : DbContext
             type => type.FullName?.ToLower().Contains("configuration") ?? false);
     }
     
-    
     private ILoggerFactory CreateLoggerFactory() => 
         LoggerFactory.Create(builder => { builder.AddConsole(); });
 }
