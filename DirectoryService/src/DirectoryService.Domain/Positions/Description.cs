@@ -1,11 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Positions;
 
 public record Description
 {
-    private const int MAX_LENGTH = 1000;
-    
     public string Value { get; }
 
     private Description(string value)
@@ -15,7 +14,7 @@ public record Description
     
     public static Result<Description, string> Create(string value)
     {
-        if (value.Length < MAX_LENGTH)
+        if (value.Length < Constants.MAX_LENGTH_DESCRIPTION)
         {
             return "Description name is invalid";
         }

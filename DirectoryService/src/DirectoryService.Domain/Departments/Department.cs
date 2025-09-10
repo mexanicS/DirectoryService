@@ -48,7 +48,7 @@ public sealed class Department
      
      public DateTime CreatedAt { get; private set; }
      
-     public DateTime UpdatedAt { get; private set; }
+     public DateTime? UpdatedAt { get; private set; }
      
      public IReadOnlyList<Department> DepartmentsChildren => _departmentsChildren;
      

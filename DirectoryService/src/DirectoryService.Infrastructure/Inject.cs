@@ -1,6 +1,3 @@
-using DirectoryService.Domain.DepartmentPositions;
-using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Positions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
