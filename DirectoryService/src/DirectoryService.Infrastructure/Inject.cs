@@ -1,3 +1,5 @@
+using DirectoryService.Application.DirectoryServiceManagement.Commands;
+using DirectoryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +12,8 @@ public static class Inject
         IConfiguration configuration)
     {
         services
-            .AddDbContexts(configuration);
+            .AddDbContexts(configuration)
+            .AddRepositories();
         
         return services;
     }
@@ -22,6 +25,13 @@ public static class Inject
         services.AddScoped<DirectoryServiceDbContext>(_ => 
             new DirectoryServiceDbContext(configuration.GetConnectionString("Database")!));
         
+        return services;
+    }
+    
+    private static IServiceCollection AddRepositories(
+        this IServiceCollection services)
+    {
+        services.AddScoped<ILocationsRepository, LocationsRepository>();
         return services;
     }
 }
