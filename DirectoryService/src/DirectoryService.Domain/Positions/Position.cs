@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.DepartmentPositions;
 
 namespace DirectoryService.Domain.Positions;

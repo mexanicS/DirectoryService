@@ -1,13 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Positions;
 
 public record PositionName
 {
-    private const int MIN_LENGTH = 3;
-    
-    private const int MAX_LENGTH = 100;
-    
     public string Value { get; }
 
     private PositionName(string value)
@@ -17,8 +14,8 @@ public record PositionName
     
     public static Result<PositionName, string> Create(string value)
     {
-        if (value.Length < MIN_LENGTH ||
-            value.Length > MAX_LENGTH)
+        if (value.Length < Constants.MIN_LENGTH_POSITION_NAME ||
+            value.Length > Constants.MAX_LENGTH_POSITION_NAME)
         {
             return "PositionName name is invalid";
         }

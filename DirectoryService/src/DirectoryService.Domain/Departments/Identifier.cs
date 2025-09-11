@@ -1,14 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
+using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Departments;
 
 public sealed record Identifier
 {    
-    private const int MIN_LENGTH_TEXT = 3;
-    
-    private const int MAX_LENGTH_TEXT = 150;
-    
     private static readonly Regex _identifierRegex = new("^[A-Za-z]+$", RegexOptions.Compiled);
     public string Value { get; }
 
@@ -20,8 +17,8 @@ public sealed record Identifier
     public static Result<Identifier, string> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
-            value.Length < MIN_LENGTH_TEXT ||
-            value.Length > MAX_LENGTH_TEXT ||
+            value.Length < Constants.MIN_LENGTH_DEPARTMENT_IDENTIFIER ||
+            value.Length > Constants.MAX_LENGTH_DEPARTMENT_IDENTIFIER ||
             !_identifierRegex.IsMatch(value))
         {
             return "Identifier is invalid";
