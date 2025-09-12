@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Domain.Locations;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
@@ -12,9 +13,10 @@ public class CreateLocationHandler
         _locationsRepository = locationsRepository;
     }
 
-    public async Task<Result<Guid, string>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
+    public async Task<Result<Guid, string>> Handle(CreateLocationDto createLocationDto, 
+        CancellationToken cancellationToken)
     {
-        var location = CreateLocation(command);
+        var location = CreateLocation(createLocationDto);
         
         if (location.IsFailure)
         {
@@ -22,33 +24,39 @@ public class CreateLocationHandler
         }
         
         await _locationsRepository.AddAsync(location.Value, cancellationToken);
-        await _locationsRepository.SaveChangesAsync(cancellationToken);
+        
+        var saveResult = await _locationsRepository.SaveChangesAsync(cancellationToken);
+        
+        if (saveResult.IsFailure)
+        {
+            return saveResult.Error;
+        }
         
         return location.Value.Id.Value;
     }
     
-    private Result<Location, string> CreateLocation(CreateLocationCommand command)
+    private Result<Location, string> CreateLocation(CreateLocationDto createLocationDto)
     {
         //TO DO перенести проверки vo в валидатор (когда добавлю)
         var locationId = new LocationId(Guid.NewGuid());
 
-        var locationName = LocationName.Create(command.LocationName);
+        var locationName = LocationName.Create(createLocationDto.LocationName);
         if (locationName.IsFailure)
         {
             return locationName.Error;
         }
         
         var address = Address.Create(
-            command.Address.City, 
-            command.Address.Street,
-            command.Address.HouseNumber, 
-            command.Address.ZipCode);
+            createLocationDto.Address.City, 
+            createLocationDto.Address.Street,
+            createLocationDto.Address.HouseNumber, 
+            createLocationDto.Address.ZipCode);
         if (address.IsFailure)
         {
             return address.Error;
         }
         
-        var timezone = Timezone.Create(command.Timezone);
+        var timezone = Timezone.Create(createLocationDto.Timezone);
         if (timezone.IsFailure)
         {
             return timezone.Error;
