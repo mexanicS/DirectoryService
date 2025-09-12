@@ -1,10 +1,17 @@
+using DirectoryService.Application;
 using DirectoryService.Infrastructure;
+using DirectoryService.Presentation.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(DirectoryServiceController).Assembly);
+
 builder.Services.AddOpenApi();
-builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services
+    .AddInfrastructure(builder.Configuration)
+    .AddSpeciesApplication();
 
 var app = builder.Build();
 
