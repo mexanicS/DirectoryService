@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryService.Domain.Shared;
 
 namespace DirectoryService.Domain.Locations;
 
 public record Address
 {
-    public const int MAX_LENGTH = 200;
     public string City { get; private set; } = null!;
 
     public string Street { get; private set; } = null!;
@@ -29,16 +29,16 @@ public record Address
     public static Result<Address, string> Create(string city, string street, string houseNumber, string? zipCode)
     {
         //TODO когда добавлю класс Error сделать сбор ошибок
-        if (string.IsNullOrWhiteSpace(city) || city.Length > MAX_LENGTH)
+        if (string.IsNullOrWhiteSpace(city) || city.Length > Constants.Address.MAX_LENGTH_ADDRESS_CITY)
             return"city is invalid";
             
-        if (string.IsNullOrWhiteSpace(street) || street.Length > MAX_LENGTH)
+        if (string.IsNullOrWhiteSpace(street) || street.Length > Constants.Address.MAX_LENGTH_ADDRESS_STREET)
             return "street is invalid";
             
-        if (string.IsNullOrWhiteSpace(houseNumber) || houseNumber.Length > MAX_LENGTH)
+        if (string.IsNullOrWhiteSpace(houseNumber) || houseNumber.Length > Constants.Address.MAX_LENGTH_ADDRESS_HOUSE_NUMBER)
             return "house is invalid";
             
-        if (street.Length > MAX_LENGTH)
+        if (street.Length > Constants.Address.MAX_LENGTH_ADDRESS_ZIP_CODE)
             return "zipCode is invalid";
             
         return new Address(city, street, houseNumber, zipCode);
