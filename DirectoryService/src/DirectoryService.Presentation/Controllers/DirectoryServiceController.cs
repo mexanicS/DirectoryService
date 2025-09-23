@@ -1,6 +1,7 @@
 using DirectoryService.Application;
 using DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
+using DirectoryService.Presentation.EndpointResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,16 +16,11 @@ public class DirectoryServiceController : ControllerBase
     }
 
     [HttpPost("/api/locations")]
-    public async Task<ActionResult> Create(
+    public async Task<EndpointResult<Guid>> Create(
         [FromServices] CreateLocationHandler handler,
         [FromBody] CreateLocationDto request,
         CancellationToken cancellationToken = default)
     {
-        var result = await handler.Handle(request, cancellationToken);
-            
-        if(result.IsFailure)
-            return BadRequest(result.Error);
-            
-        return Ok(result.Value);
+        return await handler.Handle(request, cancellationToken);
     }
 }

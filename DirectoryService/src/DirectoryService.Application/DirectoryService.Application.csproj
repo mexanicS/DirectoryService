@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\DirectoryService.Contract\DirectoryService.Contract.csproj" />
       <ProjectReference Include="..\DirectoryService.Domain\DirectoryService.Domain.csproj" />
+      <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
     </ItemGroup>
 
     <ItemGroup>

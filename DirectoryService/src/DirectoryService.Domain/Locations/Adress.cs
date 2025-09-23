@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Locations;
 
@@ -26,20 +27,19 @@ public record Address
         ZipCode = zipCode;
     }
         
-    public static Result<Address, string> Create(string city, string street, string houseNumber, string? zipCode)
+    public static Result<Address, Error> Create(string city, string street, string houseNumber, string? zipCode)
     {
-        //TODO когда добавлю класс Error сделать сбор ошибок
         if (string.IsNullOrWhiteSpace(city) || city.Length > Constants.Address.MAX_LENGTH_ADDRESS_CITY)
-            return"city is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(City));
             
         if (string.IsNullOrWhiteSpace(street) || street.Length > Constants.Address.MAX_LENGTH_ADDRESS_STREET)
-            return "street is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(Street));
             
         if (string.IsNullOrWhiteSpace(houseNumber) || houseNumber.Length > Constants.Address.MAX_LENGTH_ADDRESS_HOUSE_NUMBER)
-            return "house is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(HouseNumber));
             
-        if (street.Length > Constants.Address.MAX_LENGTH_ADDRESS_ZIP_CODE)
-            return "zipCode is invalid";
+        if (zipCode?.Length > Constants.Address.MAX_LENGTH_ADDRESS_ZIP_CODE)
+            return GeneralErrors.ValueIsInvalid(nameof(ZipCode));
             
         return new Address(city, street, houseNumber, zipCode);
     }
