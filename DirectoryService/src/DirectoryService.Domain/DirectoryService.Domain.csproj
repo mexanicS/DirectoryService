@@ -5,11 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
-    </ItemGroup>
-
+  
     <ItemGroup>
       <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
     </ItemGroup>

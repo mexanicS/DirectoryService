@@ -1,6 +1,8 @@
 using DirectoryService.Application;
 using DirectoryService.Infrastructure;
 using DirectoryService.Presentation.Controllers;
+using DirectoryService.Presentation.Middlewares;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,9 @@ builder.Services
     .AddSpeciesApplication();
 
 var app = builder.Build();
+
+app.UseExceptionMiddleware();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
