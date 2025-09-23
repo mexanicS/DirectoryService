@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Domain.Locations;
+using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
 
@@ -13,29 +14,29 @@ public class CreateLocationHandler
         _locationsRepository = locationsRepository;
     }
 
-    public async Task<Result<Guid, string>> Handle(CreateLocationDto createLocationDto, 
+    public async Task<Result<Guid, Errors>> Handle(CreateLocationDto createLocationDto, 
         CancellationToken cancellationToken)
     {
-        var location = CreateLocation(createLocationDto);
+        var locationCreateResult = CreateLocation(createLocationDto);
         
-        if (location.IsFailure)
+        if (locationCreateResult.IsFailure)
         {
-            return location.Error;
+            return locationCreateResult.Error;
         }
         
-        await _locationsRepository.AddAsync(location.Value, cancellationToken);
+        await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         
         var saveResult = await _locationsRepository.SaveChangesAsync(cancellationToken);
         
         if (saveResult.IsFailure)
         {
-            return saveResult.Error;
+            return new Errors([GeneralErrors.Failure(saveResult.Error)]);
         }
         
-        return location.Value.Id.Value;
+        return locationCreateResult.Value.Id.Value;
     }
     
-    private Result<Location, string> CreateLocation(CreateLocationDto createLocationDto)
+    private Result<Location, Errors> CreateLocation(CreateLocationDto createLocationDto)
     {
         //TO DO перенести проверки vo в валидатор (когда добавлю)
         var locationId = new LocationId(Guid.NewGuid());
@@ -43,7 +44,7 @@ public class CreateLocationHandler
         var locationName = LocationName.Create(createLocationDto.LocationName);
         if (locationName.IsFailure)
         {
-            return locationName.Error;
+            return locationName.Error.ToErrors();
         }
         
         var address = Address.Create(
@@ -53,13 +54,13 @@ public class CreateLocationHandler
             createLocationDto.Address.ZipCode);
         if (address.IsFailure)
         {
-            return address.Error;
+            return address.Error.ToErrors();
         }
         
         var timezone = Timezone.Create(createLocationDto.Timezone);
         if (timezone.IsFailure)
         {
-            return timezone.Error;
+            return timezone.Error.ToErrors();
         }
         
         var location = Location.Create(locationId,

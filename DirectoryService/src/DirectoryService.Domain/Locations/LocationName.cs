@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Locations;
 
@@ -12,13 +13,13 @@ public record LocationName
         Value = value;
     }
     
-    public static Result<LocationName, string> Create(string value)
+    public static Result<LocationName, Error> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
             value.Length < Constants.MIN_LENGTH_LOCATION_NAME ||
             value.Length > Constants.MAX_LENGTH_LOCATION_NAME)
         {
-            return "LocationName name is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(LocationName));
         }
         return new LocationName(value);
     }

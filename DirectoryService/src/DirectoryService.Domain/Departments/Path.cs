@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Departments;
 
@@ -12,12 +13,12 @@ public record Path
         Value = value;
     }
 
-    public static Result<Path, string> Create(string value)
+    public static Result<Path, Error> Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value) ||
             value.Length > Constants.MAX_LENGTH_DEPARTMENT_PATH)
         {
-            return "Path is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(Path));
         }
 
         return new Path(value);

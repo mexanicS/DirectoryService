@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Shared;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Positions;
 
@@ -12,11 +13,11 @@ public record Description
         Value = value;
     }
     
-    public static Result<Description, string> Create(string value)
+    public static Result<Description, Error> Create(string value)
     {
         if (value.Length < Constants.MAX_LENGTH_DESCRIPTION)
         {
-            return "Description name is invalid";
+            return GeneralErrors.ValueIsInvalid(nameof(Description));
         }
         return new Description(value);
     }
