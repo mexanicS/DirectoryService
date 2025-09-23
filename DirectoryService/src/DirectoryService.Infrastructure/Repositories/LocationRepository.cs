@@ -11,7 +11,7 @@ public class LocationsRepository : ILocationsRepository
     private readonly ILogger<LocationsRepository> _logger;
 
     public LocationsRepository(DirectoryServiceDbContext context,
-        ILogger<LocationsRepository>  logger)
+        ILogger<LocationsRepository> logger)
     {
         _context = context;
         _logger = logger;
@@ -34,7 +34,7 @@ public class LocationsRepository : ILocationsRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError("упало");
+            _logger.LogCritical(ex, "An error when trying to save changes in the database");
             return Result.Failure(ex.Message);
         }
     }
