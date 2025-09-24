@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Domain.Locations;
+using Microsoft.Extensions.Logging;
 using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
@@ -8,10 +9,14 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Commands.Locat
 public class CreateLocationHandler
 {
     private readonly ILocationsRepository _locationsRepository;
+    private readonly ILogger<CreateLocationHandler> _logger;
 
-    public CreateLocationHandler(ILocationsRepository locationsRepository)
+    public CreateLocationHandler(ILocationsRepository locationsRepository,
+        ILogger<CreateLocationHandler> logger
+        )
     {
         _locationsRepository = locationsRepository;
+        _logger = logger;
     }
 
     public async Task<Result<Guid, Errors>> Handle(CreateLocationDto createLocationDto, 
@@ -32,6 +37,8 @@ public class CreateLocationHandler
         {
             return new Errors([GeneralErrors.Failure(saveResult.Error)]);
         }
+        
+        _logger.LogInformation("Created location added with id {locationId}", locationCreateResult.Value.Id.Value);
         
         return locationCreateResult.Value.Id.Value;
     }
