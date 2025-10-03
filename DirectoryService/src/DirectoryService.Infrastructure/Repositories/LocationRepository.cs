@@ -1,7 +1,9 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Commands;
 using DirectoryService.Domain.Locations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
@@ -17,12 +19,12 @@ public class LocationsRepository : ILocationsRepository
         _logger = logger;
     }
     
-    public async Task<Guid> AddAsync(Location location, 
+    public async Task<Result<Guid>> AddAsync(Location location, 
         CancellationToken cancellationToken = default)
     {
-        await _context.Locations.AddAsync(location,cancellationToken);
-        
-        return location.Id;
+        await _context.Locations.AddAsync(location, cancellationToken);
+
+        return Result.Success<Guid>(location.Id).Value;
     }
 
     public async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -32,10 +34,20 @@ public class LocationsRepository : ILocationsRepository
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
+        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        {
+            _logger.LogWarning(ex, "Location with this name already exists.");
+            return Result.Failure("Location with this name already exists.");
+        }
         catch (Exception ex)
         {
             _logger.LogCritical(ex, "An error when trying to save changes in the database");
-            return Result.Failure(ex.Message);
+            return Result.Failure($"Database error: {ex.Message}");
         }
+    }
+    
+    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+    {
+        return ex.InnerException is Npgsql.PostgresException { SqlState: "23505" };
     }
 }
