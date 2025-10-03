@@ -1,11 +1,12 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Locations;
+using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Commands;
 
 public interface ILocationsRepository
 {
-    Task<Guid> AddAsync(Location location, 
+    Task<Result<Guid>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default);

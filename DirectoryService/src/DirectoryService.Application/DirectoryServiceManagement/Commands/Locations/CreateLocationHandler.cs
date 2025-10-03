@@ -1,6 +1,8 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Text;
+using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Domain.Locations;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -10,18 +12,26 @@ public class CreateLocationHandler
 {
     private readonly ILocationsRepository _locationsRepository;
     private readonly ILogger<CreateLocationHandler> _logger;
+    private readonly IValidator<CreateLocationDto> _validator;
 
     public CreateLocationHandler(ILocationsRepository locationsRepository,
-        ILogger<CreateLocationHandler> logger
-        )
+        ILogger<CreateLocationHandler> logger,
+        IValidator<CreateLocationDto> validator)
     {
         _locationsRepository = locationsRepository;
         _logger = logger;
+        _validator = validator;
     }
 
     public async Task<Result<Guid, Errors>> Handle(CreateLocationDto createLocationDto, 
         CancellationToken cancellationToken)
     {
+        var validationResult = await _validator.ValidateAsync(createLocationDto, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToErrors();
+        }
+        
         var locationCreateResult = CreateLocation(createLocationDto);
         
         if (locationCreateResult.IsFailure)
