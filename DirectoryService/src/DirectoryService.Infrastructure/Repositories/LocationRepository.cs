@@ -19,30 +19,26 @@ public class LocationsRepository : ILocationsRepository
         _logger = logger;
     }
     
-    public async Task<Result<Guid>> AddAsync(Location location, 
+    public async Task<Result<Guid, Errors>> AddAsync(Location location, 
         CancellationToken cancellationToken = default)
-    {
-        await _context.Locations.AddAsync(location, cancellationToken);
-
-        return Result.Success<Guid>(location.Id).Value;
-    }
-
-    public async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
+            await _context.Locations.AddAsync(location, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-            return Result.Success();
+
+            return location.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
-            _logger.LogWarning(ex, "Location with this name already exists.");
-            return Result.Failure("Location with this name already exists.");
+            _logger.LogWarning(ex, "Location with this name already exists");
+            return GeneralErrors.AlreadyExist().ToErrors();
         }
+
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "An error when trying to save changes in the database");
-            return Result.Failure($"Database error: {ex.Message}");
+            _logger.LogError(ex, "Error to add location");
+            return GeneralErrors.Failure().ToErrors();
         }
     }
 
@@ -59,8 +55,14 @@ public class LocationsRepository : ILocationsRepository
         return exists;
     }
 
+    public async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+    
     private static bool IsUniqueConstraintViolation(DbUpdateException ex)
     {
-        return ex.InnerException is Npgsql.PostgresException { SqlState: "23505" };
+        return ex.InnerException is Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation };
     }
 }

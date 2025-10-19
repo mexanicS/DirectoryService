@@ -6,7 +6,7 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Commands;
 
 public interface ILocationsRepository
 {
-    Task<Result<Guid>> AddAsync(Location location, 
+    Task<Result<Guid, Errors>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default);
