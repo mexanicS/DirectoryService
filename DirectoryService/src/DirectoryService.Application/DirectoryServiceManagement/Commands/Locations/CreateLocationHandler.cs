@@ -33,12 +33,6 @@ public class CreateLocationHandler
         }
         
         var locationCreateResult = CreateLocation(createLocationDto);
-        
-        if (locationCreateResult.IsFailure)
-        {
-            return locationCreateResult.Error;
-        }
-        
         await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         
         var saveResult = await _locationsRepository.SaveChangesAsync(cancellationToken);
@@ -53,32 +47,19 @@ public class CreateLocationHandler
         return locationCreateResult.Value.Id.Value;
     }
     
-    private Result<Location, Errors> CreateLocation(CreateLocationDto createLocationDto)
+    private Result<Location> CreateLocation(CreateLocationDto createLocationDto)
     {
-        //TO DO перенести проверки vo в валидатор (когда добавлю)
         var locationId = new LocationId(Guid.NewGuid());
 
         var locationName = LocationName.Create(createLocationDto.LocationName);
-        if (locationName.IsFailure)
-        {
-            return locationName.Error.ToErrors();
-        }
         
         var address = Address.Create(
             createLocationDto.Address.City, 
             createLocationDto.Address.Street,
             createLocationDto.Address.HouseNumber, 
             createLocationDto.Address.ZipCode);
-        if (address.IsFailure)
-        {
-            return address.Error.ToErrors();
-        }
-        
+       
         var timezone = Timezone.Create(createLocationDto.Timezone);
-        if (timezone.IsFailure)
-        {
-            return timezone.Error.ToErrors();
-        }
         
         var location = Location.Create(locationId,
             locationName.Value,
