@@ -33,6 +33,13 @@ public class CreateLocationHandler
         }
         
         var locationCreateResult = CreateLocation(createLocationDto);
+        
+        var existsByName = await _locationsRepository
+            .ExistsByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
+        
+        if (existsByName.Value)
+            return GeneralErrors.AlreadyExistByAddress().ToErrors();
+
         await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         
         var saveResult = await _locationsRepository.SaveChangesAsync(cancellationToken);

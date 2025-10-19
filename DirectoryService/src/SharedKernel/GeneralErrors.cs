@@ -43,4 +43,9 @@ public static class GeneralErrors
     {
         return Error.Failure("server.failure", message ?? "Серверная ошибка");
     }
+    
+    public static Error AlreadyExistByAddress()
+    {
+        return Error.Validation("record.already.exist", "Локация с таким адрессом уже существует");
+    }
 }

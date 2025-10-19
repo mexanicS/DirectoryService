@@ -10,4 +10,6 @@ public interface ILocationsRepository
         CancellationToken cancellationToken = default);
     
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default);
+    
+    Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken);
 }

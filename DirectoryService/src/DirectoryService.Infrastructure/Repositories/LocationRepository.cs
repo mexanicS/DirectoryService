@@ -45,7 +45,20 @@ public class LocationsRepository : ILocationsRepository
             return Result.Failure($"Database error: {ex.Message}");
         }
     }
-    
+
+    public async Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken)
+    {
+        bool exists = await _context.Locations.AnyAsync(
+            l =>
+                l.Address.City == address.City &&
+                l.Address.Street == address.Street &&
+                l.Address.HouseNumber == address.HouseNumber &&
+                l.Address.ZipCode == address.ZipCode,
+            cancellationToken);
+        
+        return exists;
+    }
+
     private static bool IsUniqueConstraintViolation(DbUpdateException ex)
     {
         return ex.InnerException is Npgsql.PostgresException { SqlState: "23505" };
