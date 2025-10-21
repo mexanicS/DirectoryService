@@ -57,8 +57,17 @@ public class LocationsRepository : ILocationsRepository
 
     public async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await _context.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "An error when trying to save changes in the database");
+            return Result.Failure($"Database error: {ex.Message}");
+        }
+        
     }
     
     private static bool IsUniqueConstraintViolation(DbUpdateException ex)
