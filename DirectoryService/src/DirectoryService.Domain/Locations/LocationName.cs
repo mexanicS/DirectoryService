@@ -15,12 +15,18 @@ public record LocationName
     
     public static Result<LocationName, Error> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) ||
-            value.Length < Constants.MIN_LENGTH_LOCATION_NAME ||
+        if(string.IsNullOrWhiteSpace(value))
+            return GeneralErrors.ValueIsRequired(nameof(LocationName));
+            
+        if (value.Length < Constants.MIN_LENGTH_LOCATION_NAME ||
             value.Length > Constants.MAX_LENGTH_LOCATION_NAME)
         {
-            return GeneralErrors.ValueIsInvalid(nameof(LocationName));
+            return GeneralErrors.ValueIsMustBeBetween(
+                Constants.MIN_LENGTH_LOCATION_NAME,
+                Constants.MAX_LENGTH_LOCATION_NAME,
+                nameof(LocationName));
         }
+        
         return new LocationName(value);
     }
 }

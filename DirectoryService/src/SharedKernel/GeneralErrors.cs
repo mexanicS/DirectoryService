@@ -7,6 +7,20 @@ public static class GeneralErrors
         string label = name ?? "значение";
         return Error.Validation("value.is.invalid", $"{label} не корректно");
     }
+    
+    public static Error ValueIsMustBeLess(int length, string? name = null)
+    {
+        string label = name ?? "значение";
+        return Error.Validation("value.is.must.be.less",
+            $"{label} должно быть меньше {length} символов.");
+    }
+    
+    public static Error ValueIsMustBeBetween(int lengthMin, int lengthMax, string? name = null)
+    {
+        string label = name ?? "значение";
+        return Error.Validation("value.is.must.be.less",
+            $"{label} должно быть от {lengthMin} до {lengthMax} символов.");
+    }
 
     public static Error NotFound(Guid? id = null, string? name = null)
     {
@@ -28,5 +42,10 @@ public static class GeneralErrors
     public static Error Failure(string? message = null)
     {
         return Error.Failure("server.failure", message ?? "Серверная ошибка");
+    }
+    
+    public static Error AlreadyExistByAddress()
+    {
+        return Error.Validation("record.already.exist", "Локация с таким адрессом уже существует");
     }
 }
