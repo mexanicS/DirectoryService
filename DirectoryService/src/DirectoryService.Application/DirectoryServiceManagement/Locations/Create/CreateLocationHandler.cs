@@ -1,12 +1,12 @@
-﻿using System.Text;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
+using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
-namespace DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
+namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 
 public class CreateLocationHandler
 {
@@ -40,13 +40,11 @@ public class CreateLocationHandler
         if (existsByName.Value)
             return GeneralErrors.AlreadyExistByAddress().ToErrors();
 
-        await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
+        var addAsync = await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         
-        var saveResult = await _locationsRepository.SaveChangesAsync(cancellationToken);
-        
-        if (saveResult.IsFailure)
+        if (addAsync.IsFailure)
         {
-            return new Errors([GeneralErrors.Failure(saveResult.Error)]);
+            return new Errors([GeneralErrors.Failure(addAsync.Error.ToString())]);
         }
         
         _logger.LogInformation("Created location added with id {locationId}", locationCreateResult.Value.Id.Value);

@@ -6,4 +6,6 @@ public record LocationId(Guid Value)
     {
         return volunteerId.Value;
     }
+    
+    public static LocationId Create(Guid id) => new LocationId(id);
 }

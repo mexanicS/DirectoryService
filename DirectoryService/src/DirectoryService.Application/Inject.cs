@@ -1,4 +1,4 @@
-using DirectoryService.Application.DirectoryServiceManagement.Commands.Locations;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 

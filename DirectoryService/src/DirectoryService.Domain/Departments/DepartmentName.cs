@@ -15,12 +15,20 @@ public record DepartmentName
 
     public static Result<DepartmentName, Error> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) ||
-            value.Length < Constants.MIN_LENGTH_DEPARTMENT_NAME ||
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return GeneralErrors.ValueIsRequired(nameof(DepartmentName));
+        }
+
+        if (value.Length < Constants.MIN_LENGTH_DEPARTMENT_NAME ||
             value.Length > Constants.MAX_LENGTH_DEPARTMENT_NAME)
         {
-            return GeneralErrors.ValueIsInvalid(nameof(DepartmentName));
+            return GeneralErrors.ValueIsMustBeBetween(
+                Constants.MIN_LENGTH_DEPARTMENT_NAME,
+                Constants.MAX_LENGTH_DEPARTMENT_NAME,
+                nameof(DepartmentName));
         }
+            
         return new DepartmentName(value);
     }
     

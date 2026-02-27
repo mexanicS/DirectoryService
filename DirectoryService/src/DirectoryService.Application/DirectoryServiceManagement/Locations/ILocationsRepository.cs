@@ -2,14 +2,16 @@ using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Locations;
 using SharedKernel;
 
-namespace DirectoryService.Application.DirectoryServiceManagement.Commands;
+namespace DirectoryService.Application.DirectoryServiceManagement.Locations;
 
 public interface ILocationsRepository
 {
     Task<Result<Guid, Errors>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
-    Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default);
-    
     Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken);
+    
+    Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken);
+    
+    Task<Result<bool, Error>> ExistsActiveLocationsById(IEnumerable<Guid> locationsId, CancellationToken cancellationToken);
 }

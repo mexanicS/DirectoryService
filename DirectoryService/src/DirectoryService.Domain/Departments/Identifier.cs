@@ -17,13 +17,25 @@ public sealed record Identifier
     
     public static Result<Identifier, Error> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) ||
-            value.Length < Constants.MIN_LENGTH_DEPARTMENT_IDENTIFIER ||
-            value.Length > Constants.MAX_LENGTH_DEPARTMENT_IDENTIFIER ||
-            !_identifierRegex.IsMatch(value))
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return GeneralErrors.ValueIsRequired(nameof(Identifier));
+        }
+
+        if (!_identifierRegex.IsMatch(value))
         {
             return GeneralErrors.ValueIsInvalid(nameof(Identifier));
         }
+
+        if (value.Length < Constants.MIN_LENGTH_DEPARTMENT_IDENTIFIER ||
+            value.Length > Constants.MAX_LENGTH_DEPARTMENT_IDENTIFIER)
+        {
+            return GeneralErrors.ValueIsMustBeBetween(
+                Constants.MIN_LENGTH_DEPARTMENT_IDENTIFIER,
+                Constants.MAX_LENGTH_DEPARTMENT_IDENTIFIER,
+                nameof(Identifier));
+        }
+        
         return new Identifier(value);
     }
 }

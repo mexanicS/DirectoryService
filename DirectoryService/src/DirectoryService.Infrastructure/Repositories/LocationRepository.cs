@@ -1,5 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.DirectoryServiceManagement.Commands;
+using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -7,13 +12,13 @@ using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
-public class LocationsRepository : ILocationsRepository
+public class LocationsRepository : BaseRepository<Location>, ILocationsRepository
 {
     private readonly DirectoryServiceDbContext _context;
     private readonly ILogger<LocationsRepository> _logger;
 
     public LocationsRepository(DirectoryServiceDbContext context,
-        ILogger<LocationsRepository> logger)
+        ILogger<LocationsRepository> logger) : base(context, logger)
     {
         _context = context;
         _logger = logger;
@@ -25,8 +30,11 @@ public class LocationsRepository : ILocationsRepository
         try
         {
             await _context.Locations.AddAsync(location, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-
+            var saveResult = await SaveChangesAsync(cancellationToken);
+            if (saveResult.IsFailure)
+            {
+                return new Errors([GeneralErrors.Failure(saveResult.Error)]);
+            }
             return location.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
@@ -34,7 +42,6 @@ public class LocationsRepository : ILocationsRepository
             _logger.LogWarning(ex, "Location with this name already exists");
             return GeneralErrors.AlreadyExist().ToErrors();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error to add location");
@@ -44,7 +51,7 @@ public class LocationsRepository : ILocationsRepository
 
     public async Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken)
     {
-        bool exists = await _context.Locations.AnyAsync(
+        var exists = await _context.Locations.AnyAsync(
             l =>
                 l.Address.City == address.City &&
                 l.Address.Street == address.Street &&
@@ -55,23 +62,22 @@ public class LocationsRepository : ILocationsRepository
         return exists;
     }
 
-    public async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken)
     {
-        try
-        {
-            await _context.SaveChangesAsync(cancellationToken);
-            return Result.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex, "An error when trying to save changes in the database");
-            return Result.Failure($"Database error: {ex.Message}");
-        }
-        
+        return await _context.Locations.AnyAsync(l => l.Id == locationId && l.IsActive, cancellationToken);
     }
-    
-    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+
+    public async Task<Result<bool, Error>> ExistsActiveLocationsById(IEnumerable<Guid> locationsId,
+        CancellationToken cancellationToken)
     {
-        return ex.InnerException is Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation };
+        var locationIds = locationsId.Distinct().ToArray();
+        var expectedCount = locationIds.Length;
+
+        var actualCount = await _context.Locations
+            .CountAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+
+        return expectedCount == actualCount
+            ? true
+            : Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
     }
 }

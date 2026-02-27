@@ -1,4 +1,4 @@
-using DirectoryService.Domain;
+using System;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +52,10 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.Property(p => p.Depth)
             .HasColumnName("depth")
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(
+                name => name.Value, 
+                value => DepartmentDepth.Create(value).Value);
 
         builder.Property(p => p.IsActive)
             .HasColumnName("is_active")
@@ -78,5 +81,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.HasMany(x => x.DepartmentPositions)
             .WithOne()
             .HasForeignKey(x => x.DepartmentId);
+        
+        builder.HasIndex(x => x.Identifier).IsUnique();
     }
 }

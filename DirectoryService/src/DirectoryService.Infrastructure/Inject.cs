@@ -1,4 +1,5 @@
-using DirectoryService.Application.DirectoryServiceManagement.Commands;
+using DirectoryService.Application.DirectoryServiceManagement.Departments;
+using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ public static class Inject
         this IServiceCollection services)
     {
         services.AddScoped<ILocationsRepository, LocationsRepository>();
+        services.AddScoped<IDepartmentsRepository, DepartmentRepository>();
         return services;
     }
 }
