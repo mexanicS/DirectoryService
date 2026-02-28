@@ -1,6 +1,7 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Presentation.EndpointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,15 @@ public class DirectoryServiceController : ControllerBase
     public async Task<EndpointResult<Guid>> CreateDepartment(
         [FromServices] CreateDepartmentHandler handler,
         [FromBody] CreateDepartmentDto request, 
+        CancellationToken cancellationToken = default)
+    {
+        return await handler.Handle(request, cancellationToken);
+    }
+    
+    [HttpPost("/api/positions")]
+    public async Task<EndpointResult<Guid>> CreatePosition(
+        [FromServices] CreatePositionHandler handler,
+        [FromBody] CreatePositionDto request, 
         CancellationToken cancellationToken = default)
     {
         return await handler.Handle(request, cancellationToken);

@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.DepartmentPositions;
+using DirectoryService.Domain.Positions;
 using SharedKernel;
 
 namespace DirectoryService.Domain.Departments;
@@ -129,5 +130,20 @@ public sealed class Department
              path.Value,
              locations,
              departmentDepth);
+     }
+     
+     public UnitResult<Error> AddPosition(Guid positionId)
+     {
+         var departmentPosition = _departmentPositions
+             .FirstOrDefault(x => x.PositionId.Value == positionId);
+
+         if (departmentPosition is null)
+         {
+             _departmentPositions.Add(DepartmentPosition.Create(Id, new PositionId(positionId)).Value);
+
+             return Result.Success<Error>();
+         }
+
+         return GeneralErrors.AlreadyExist();
      }
 }

@@ -35,6 +35,7 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
             {
                 return new Errors([GeneralErrors.Failure(saveResult.Error)]);
             }
+            
             return location.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
