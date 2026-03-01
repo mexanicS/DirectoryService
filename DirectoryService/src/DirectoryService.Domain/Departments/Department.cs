@@ -25,7 +25,8 @@ public sealed class Department
         Identifier identifier, 
         Path path,
         IEnumerable<DepartmentLocation> departmentLocations,
-        DepartmentDepth depth)
+        DepartmentDepth depth,
+        DepartmentId? parentId = null)
     {
         Id = departmentId;
         Name = name;
@@ -35,6 +36,7 @@ public sealed class Department
         CreatedAt = DateTime.UtcNow;
         Depth = depth;
         _departmentLocations = departmentLocations.ToList();
+        ParentId = parentId;
     }
      public DepartmentId Id { get; private set; }
      
@@ -60,17 +62,6 @@ public sealed class Department
      
      public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
-     public static Result<Department> Create(
-         DepartmentId departmentId,
-         DepartmentName name, 
-         Identifier identifier, 
-         Path path,
-         IEnumerable<DepartmentLocation> departmentLocations,
-         DepartmentDepth depth)
-     {
-         return new Department(departmentId, name, identifier, path, departmentLocations, depth);
-     }
-     
      public static Result<Department, Error> CreateParent(
          DepartmentName name,
          Identifier identifier,
@@ -129,7 +120,8 @@ public sealed class Department
              identifier,
              path.Value,
              locations,
-             departmentDepth);
+             departmentDepth,
+             departmentParent.Id);
      }
      
      public UnitResult<Error> AddPosition(Guid positionId)

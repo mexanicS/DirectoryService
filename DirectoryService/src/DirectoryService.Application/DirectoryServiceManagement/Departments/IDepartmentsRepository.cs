@@ -15,5 +15,5 @@ public interface IDepartmentsRepository
     Task<Result<bool, Error>> DepartmentExists(IEnumerable<Guid> departmentIds, 
         CancellationToken cancellationToken);
     
-    Task<Result<bool, Errors>> Save(CancellationToken cancellationToken);
+    Task<Result<bool, Errors>> SaveChanges(CancellationToken cancellationToken);
 }

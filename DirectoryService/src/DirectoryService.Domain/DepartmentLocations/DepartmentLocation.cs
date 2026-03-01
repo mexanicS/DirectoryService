@@ -14,12 +14,13 @@ public sealed class DepartmentLocation
     
     public static Result<DepartmentLocation> Create(DepartmentId departmentId, LocationId locationId)
     {
-        return new DepartmentLocation(departmentId, locationId);
+        return new DepartmentLocation(departmentId, locationId, DepartmentLocationId.Create(Guid.NewGuid()));
     }
     
-    private DepartmentLocation(DepartmentId departmentId, LocationId locationId)
+    private DepartmentLocation(DepartmentId departmentId, LocationId locationId, DepartmentLocationId id)
     {
         DepartmentId = departmentId;
         LocationId = locationId;
+        Id = id;
     }
 }

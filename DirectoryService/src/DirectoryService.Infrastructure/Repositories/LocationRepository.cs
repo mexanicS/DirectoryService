@@ -24,29 +24,25 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
         _logger = logger;
     }
     
-    public async Task<Result<Guid, Errors>> AddAsync(Location location, 
+    public async Task<Result<Guid, Error>> AddAsync(Location location, 
         CancellationToken cancellationToken = default)
     {
         try
         {
             await _context.Locations.AddAsync(location, cancellationToken);
-            var saveResult = await SaveChangesAsync(cancellationToken);
-            if (saveResult.IsFailure)
-            {
-                return new Errors([GeneralErrors.Failure(saveResult.Error)]);
-            }
+            await _context.SaveChangesAsync(cancellationToken);
             
             return location.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
             _logger.LogWarning(ex, "Location with this name already exists");
-            return GeneralErrors.AlreadyExist().ToErrors();
+            return GeneralErrors.AlreadyExist();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error to add location");
-            return GeneralErrors.Failure().ToErrors();
+            return GeneralErrors.Failure();
         }
     }
 

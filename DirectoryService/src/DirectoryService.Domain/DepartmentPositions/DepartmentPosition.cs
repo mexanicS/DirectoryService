@@ -11,10 +11,11 @@ public sealed class DepartmentPosition
     {
     }
     
-    private DepartmentPosition(DepartmentId departmentId, PositionId positionId)
+    private DepartmentPosition(DepartmentId departmentId, PositionId positionId, DepartmentPositionId departmentPositionId )
     {
         DepartmentId = departmentId;
         PositionId = positionId;
+        Id = departmentPositionId;
     }
     
     public DepartmentPositionId Id { get; init; }
@@ -25,6 +26,6 @@ public sealed class DepartmentPosition
     
     public static Result<DepartmentPosition, Error> Create(DepartmentId departmentId, PositionId positionId)
     {
-        return new DepartmentPosition(departmentId, positionId);
+        return new DepartmentPosition(departmentId, positionId, DepartmentPositionId.Create(Guid.NewGuid()));
     }
 }

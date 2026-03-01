@@ -44,7 +44,7 @@ public class CreateLocationHandler
         
         if (addAsync.IsFailure)
         {
-            return new Errors([GeneralErrors.Failure(addAsync.Error.ToString())]);
+            return new Errors([addAsync.Error]);
         }
         
         _logger.LogInformation("Created location added with id {locationId}", locationCreateResult.Value.Id.Value);

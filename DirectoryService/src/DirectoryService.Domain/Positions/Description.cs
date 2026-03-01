@@ -15,7 +15,7 @@ public record Description
     
     public static Result<Description, Error> Create(string value)
     {
-        if (value.Length < Constants.MAX_LENGTH_DESCRIPTION)
+        if (value.Length > Constants.MAX_LENGTH_DESCRIPTION)
         {
             return GeneralErrors.ValueIsInvalid(nameof(Description));
         }

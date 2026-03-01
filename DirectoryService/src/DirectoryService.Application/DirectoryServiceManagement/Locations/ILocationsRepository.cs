@@ -6,7 +6,7 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Locations;
 
 public interface ILocationsRepository
 {
-    Task<Result<Guid, Errors>> AddAsync(Location location, 
+    Task<Result<Guid, Error>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
     Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken);

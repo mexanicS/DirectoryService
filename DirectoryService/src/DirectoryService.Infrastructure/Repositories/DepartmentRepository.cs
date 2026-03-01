@@ -30,12 +30,8 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         try
         {
             await _context.Departments.AddAsync(department, cancellationToken);
-            var saveResult = await SaveChangesAsync(cancellationToken);
-            if (saveResult.IsFailure)
-            {
-                return new Errors([GeneralErrors.Failure(saveResult.Error)]);
-            }
-
+            await _context.SaveChangesAsync(cancellationToken);
+            
             return department.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
@@ -91,7 +87,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         return department;
     }
 
-    public async Task<Result<bool, Errors>> Save(CancellationToken cancellationToken)
+    public async Task<Result<bool, Errors>> SaveChanges(CancellationToken cancellationToken)
     {
         var saveResult = await SaveChangesAsync(cancellationToken);
         if (saveResult.IsFailure)

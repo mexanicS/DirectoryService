@@ -79,7 +79,7 @@ public class CreatePositionHandler
             }
         }
 
-        var saveResult = await _departmentsRepository.Save(cancellationToken);
+        var saveResult = await _departmentsRepository.SaveChanges(cancellationToken);
 
         if (saveResult.IsFailure)
         {

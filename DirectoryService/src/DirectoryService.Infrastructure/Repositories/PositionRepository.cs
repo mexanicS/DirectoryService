@@ -13,10 +13,10 @@ namespace DirectoryService.Infrastructure.Repositories;
 public class PositionRepository : BaseRepository<Position>, IPositionsRepository
 {
     private readonly DirectoryServiceDbContext _context;
-    private readonly ILogger _logger;
+    private readonly ILogger<PositionRepository> _logger;
 
     public PositionRepository(DirectoryServiceDbContext context, 
-        ILogger logger) 
+        ILogger<PositionRepository> logger) 
         : base(context, logger)
     {
         _context = context;
@@ -29,12 +29,8 @@ public class PositionRepository : BaseRepository<Position>, IPositionsRepository
         try
         {
             await _context.Positions.AddAsync(position, cancellationToken);
-            var saveResult = await SaveChangesAsync(cancellationToken);
-            if (saveResult.IsFailure)
-            {
-                return new Errors([GeneralErrors.Failure(saveResult.Error)]);
-            }
-
+            await _context.SaveChangesAsync(cancellationToken);
+            
             return position.Id.Value;
         }
         catch (Exception ex)
