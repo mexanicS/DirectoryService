@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Positions;
 using DirectoryService.Domain.Positions;

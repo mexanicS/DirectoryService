@@ -1,5 +1,8 @@
+using System;
+
 namespace DirectoryService.Application.DirectoryServiceManagement.DTOs;
 
-public record CreatePositionDto(string Name,
+public record CreatePositionDto(
+    string Name,
     string Description,
     Guid[] DepartmentIds);
