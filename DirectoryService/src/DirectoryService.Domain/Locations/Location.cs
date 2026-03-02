@@ -38,7 +38,7 @@ public sealed class Location
     
     public DateTime CreatedAt { get; private set; }
      
-    public DateTime UpdatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
     
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 

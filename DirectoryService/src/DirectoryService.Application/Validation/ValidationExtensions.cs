@@ -1,7 +1,8 @@
-﻿using FluentValidation.Results;
+﻿using System.Collections.Generic;
+using FluentValidation.Results;
 using SharedKernel;
 
-namespace DirectoryService.Application;
+namespace DirectoryService.Application.Validation;
 
 public static class ValidationExtensions
 {

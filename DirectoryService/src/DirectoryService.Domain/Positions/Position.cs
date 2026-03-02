@@ -21,7 +21,7 @@ public sealed class Position
         Name = name;
         Description = description;
         IsActive = true;
-        CreatedAt = DateTime.Now;
+        CreatedAt = DateTime.UtcNow;
     }
     public PositionId Id { get; set; }
      
@@ -33,7 +33,7 @@ public sealed class Position
     
     public DateTime CreatedAt { get; set; }
      
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 

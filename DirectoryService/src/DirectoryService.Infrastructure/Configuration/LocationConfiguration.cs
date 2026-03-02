@@ -1,5 +1,4 @@
-﻿using DirectoryService.Domain;
-using DirectoryService.Domain.Locations;
+﻿using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
