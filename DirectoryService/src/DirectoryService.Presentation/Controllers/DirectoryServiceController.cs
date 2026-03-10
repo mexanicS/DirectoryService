@@ -1,4 +1,8 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
@@ -41,4 +45,14 @@ public class DirectoryServiceController : ControllerBase
     {
         return await handler.Handle(request, cancellationToken);
     }
+    
+    [HttpPut("/api/departments/{departmentId}/locations")]
+    public async Task<EndpointResult<Guid>> UpdateLocations(
+        [FromServices] UpdateLocationsByDepartmentHandler handler,
+        [FromBody] UpdateLocationsByDepartmentDto request, 
+        CancellationToken cancellationToken = default)
+    {
+        return await handler.Handle(request, cancellationToken);
+    }
+    
 }
