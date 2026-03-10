@@ -1,7 +1,10 @@
 using DirectoryService.Application;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Infrastructure;
 using DirectoryService.Presentation.Controllers;
 using DirectoryService.Presentation.Middlewares;
+using FluentValidation;
 using Serilog;
 using Serilog.Events;
 

@@ -68,6 +68,7 @@ public class CreatePositionHandler
 
         foreach (var departmentId in createPositionDto.DepartmentIds)
         {
+            //TODO: переделать на один запрос
             var departmentResult = await _departmentsRepository
                 .GetByIdWithPositions(new DepartmentId(departmentId), cancellationToken);
 
