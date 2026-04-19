@@ -92,4 +92,18 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
 
         return saveResult.IsSuccess;
     }
+
+    public async Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id, CancellationToken cancellationToken)
+    {
+        var department = await _context.Departments
+            .Include(d => d.DepartmentLocations)
+            .FirstOrDefaultAsync(d => d.Id == id && d.IsActive, cancellationToken);
+
+        if (department is null)
+        {
+            return GeneralErrors.NotFound(id.Value, nameof(Department));
+        }
+        
+        return department;
+    }
 }

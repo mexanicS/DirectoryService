@@ -20,4 +20,7 @@ public interface IDepartmentsRepository
         CancellationToken cancellationToken);
     
     Task<Result<bool, Errors>> SaveChanges(CancellationToken cancellationToken);
+    
+    Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id, 
+        CancellationToken cancellationToken);
 }

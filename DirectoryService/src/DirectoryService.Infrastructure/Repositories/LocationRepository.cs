@@ -72,4 +72,17 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
             ? true
             : Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
     }
+    
+    public async Task<Result<List<Location>, Error>> GetById(Guid locationId, CancellationToken cancellationToken)
+    {
+        var locations = await _context.Locations.Where(d => d.Id == locationId && d.IsActive)
+            .ToListAsync(cancellationToken);
+
+        if (locations.Count == 0)
+        {
+            return GeneralErrors.NotFound(locationId, nameof(Location));
+        }
+
+        return locations;
+    }
 }
