@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.DepartmentPositions;
+using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 using SharedKernel;
 
@@ -13,11 +14,11 @@ public sealed class Department
     {
     }
 
-    private readonly List<Department> _departmentsChildren = [];
+    private List<Department> _departmentsChildren = [];
     
-    private readonly List<DepartmentLocation> _departmentLocations = [];
+    private List<DepartmentLocation> _departmentLocations = [];
     
-    private readonly List<DepartmentPosition> _departmentPositions = [];
+    private List<DepartmentPosition> _departmentPositions = [];
 
     private Department(
         DepartmentId departmentId,
@@ -137,5 +138,17 @@ public sealed class Department
          }
 
          return GeneralErrors.AlreadyExist();
+     }
+     
+     public UnitResult<Error> UpdateLocations(IEnumerable<Guid> locationIds)
+     {
+         var departmentLocations = locationIds
+             .Select(i => DepartmentLocation.Create(Id, LocationId.Create(i)).Value)
+             .ToList();
+
+         _departmentLocations = departmentLocations;
+         UpdatedAt = DateTime.UtcNow;
+         
+         return UnitResult.Success<Error>();
      }
 }
