@@ -85,4 +85,21 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
 
         return locations;
     }
+    
+    public async Task<Result<List<Location>, Error>> GetActiveLocationsById(IEnumerable<Guid> locationsId,
+        CancellationToken cancellationToken)
+    {
+        var locationIds = locationsId.Distinct().ToArray();
+        var expectedCount = locationIds.Length;
+
+        var actualCount = await _context.Locations
+            .CountAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+
+        if (expectedCount == actualCount)
+        {
+            var location = await _context.Locations.Where(l => locationIds.Contains(l.Id) && l.IsActive).ToListAsync(cancellationToken);
+            return location;
+        }
+        return Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
+    }
 }

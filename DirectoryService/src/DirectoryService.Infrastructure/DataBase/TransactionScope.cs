@@ -52,4 +52,9 @@ public class TransactionScope : ITransactionScope
             return Error.Failure("transaction.rollback.failure", message);
         }
     }
+    
+    public void Dispose()
+    {
+        _transaction.Dispose();
+    }
 }

@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
+using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -105,5 +106,18 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         }
         
         return department;
+    }
+
+    public async Task DeleteLocationsByDepartmentId(Guid id, CancellationToken cancellationToken)
+    {
+        await _context.DepartmentLocations
+            .Where(dl => dl.DepartmentId == id)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public async Task AddDepartmentLocations(IEnumerable<DepartmentLocation> departmentLocations,
+        CancellationToken cancellationToken)
+    {
+        await _context.DepartmentLocations.AddRangeAsync(departmentLocations, cancellationToken);
     }
 }

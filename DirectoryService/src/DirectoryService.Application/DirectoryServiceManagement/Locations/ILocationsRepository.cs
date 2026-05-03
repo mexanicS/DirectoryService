@@ -18,4 +18,7 @@ public interface ILocationsRepository
     Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken);
     
     Task<Result<bool, Error>> ExistsActiveLocationsById(IEnumerable<Guid> locationsId, CancellationToken cancellationToken);
+
+    Task<Result<List<Location>, Error>> GetActiveLocationsById(IEnumerable<Guid> locationsId,
+        CancellationToken cancellationToken);
 }

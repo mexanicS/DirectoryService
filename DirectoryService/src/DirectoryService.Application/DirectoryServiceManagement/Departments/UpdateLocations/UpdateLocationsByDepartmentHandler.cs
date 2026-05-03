@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
+using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using FluentValidation;
@@ -20,16 +22,19 @@ public class UpdateLocationsByDepartmentHandler
     private readonly ILocationsRepository _locationsRepository;
     private readonly ILogger<UpdateLocationsByDepartmentHandler> _logger;
     private readonly IValidator<UpdateLocationsByDepartmentDto> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public UpdateLocationsByDepartmentHandler(IDepartmentsRepository departmentsRepository,
         ILocationsRepository locationsRepository,
         ILogger<UpdateLocationsByDepartmentHandler> logger,
-        IValidator<UpdateLocationsByDepartmentDto> validator)
+        IValidator<UpdateLocationsByDepartmentDto> validator, 
+        ITransactionManager transactionManager)
     {
         _departmentsRepository = departmentsRepository;
         _locationsRepository = locationsRepository;
         _logger = logger;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid, Errors>> Handle(
@@ -42,28 +47,52 @@ public class UpdateLocationsByDepartmentHandler
             return validationResult.ToErrors();
         }
         
-        var departmentExists = await _departmentsRepository.DepartmentExists([updateDepartmentDto.DepartmentId], cancellationToken);
-        if (departmentExists.IsFailure)
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        
+        if (transactionScopeResult.IsFailure)
+            return transactionScopeResult.Error.ToErrors();
+
+        var transactionScope = transactionScopeResult.Value;
+        
+        var department = await _departmentsRepository.GetById(updateDepartmentDto.DepartmentId, cancellationToken);
+        if (department.IsFailure)
         {
-            return departmentExists.Error.ToErrors();
+            return department.Error.ToErrors();
         }
         
-        var locationExists = await _locationsRepository.ExistsActiveLocationsById(updateDepartmentDto.LocationIds, cancellationToken);
+        var locationExists = await _locationsRepository.GetActiveLocationsById(updateDepartmentDto.LocationIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();
         }
         
-        var departmentId = new DepartmentId(updateDepartmentDto.DepartmentId);
-        var departmentResult = await _departmentsRepository.GetByIdWithLocations(departmentId,
-            cancellationToken);
+        var departmentLocations = locationExists.Value
+            .Select(location => DepartmentLocation.Create(department.Value.Id, location.Id))
+            .ToList();
         
-        if (departmentResult.IsFailure)
-            return departmentResult.Error.ToErrors();
+        await _departmentsRepository.DeleteLocationsByDepartmentId(department.Value.Id, cancellationToken);
 
-        departmentResult.Value.UpdateLocations(updateDepartmentDto.LocationIds);
+        await _departmentsRepository.AddDepartmentLocations(departmentLocations.Select(result => result.Value), cancellationToken);
+        
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 
-        return departmentResult.Value.Id.Value;
+        if (saveResult.IsFailure)
+        {
+            transactionScope.Rollback();
+
+            return saveResult.Error.ToErrors();
+        }
+        
+        var commitResult = transactionScope.Commit();
+
+        if (commitResult.IsFailure)
+        {
+            transactionScope.Rollback();
+
+            return commitResult.Error.ToErrors();
+        }
+        
+        return department.Value.Id.Value;
     }
     
 }

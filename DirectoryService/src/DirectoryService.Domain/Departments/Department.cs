@@ -139,16 +139,4 @@ public sealed class Department
 
          return GeneralErrors.AlreadyExist();
      }
-     
-     public UnitResult<Error> UpdateLocations(IEnumerable<Guid> locationIds)
-     {
-         var departmentLocations = locationIds
-             .Select(i => DepartmentLocation.Create(Id, LocationId.Create(i)).Value)
-             .ToList();
-
-         _departmentLocations = departmentLocations;
-         UpdatedAt = DateTime.UtcNow;
-         
-         return UnitResult.Success<Error>();
-     }
 }
