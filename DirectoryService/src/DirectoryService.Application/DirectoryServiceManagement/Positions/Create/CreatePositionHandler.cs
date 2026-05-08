@@ -1,4 +1,5 @@
 using CSharpFunctionalExtensions;
+using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.Validation;
@@ -16,16 +17,19 @@ public class CreatePositionHandler
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILogger<CreatePositionHandler> _logger;
     private readonly IValidator<CreatePositionDto> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public CreatePositionHandler(IPositionsRepository positionsRepository,
         IDepartmentsRepository departmentsRepository,
         ILogger<CreatePositionHandler> logger,
-        IValidator<CreatePositionDto> validator)
+        IValidator<CreatePositionDto> validator,
+        ITransactionManager transactionManager)
     {
         _positionsRepository = positionsRepository;
         _departmentsRepository = departmentsRepository;
         _logger = logger;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid, Errors>> Handle(
@@ -37,6 +41,14 @@ public class CreatePositionHandler
         {
             return validationResult.ToErrors();
         }
+        
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        
+        if (transactionScopeResult.IsFailure)
+            return transactionScopeResult.Error.ToErrors();
+
+        var transactionScope = transactionScopeResult.Value;
+        
         var positionId = new PositionId(Guid.NewGuid());
         var positionName = PositionName.Create(createPositionDto.Name).Value;
         var description = Description.Create(createPositionDto.Description).Value;
@@ -85,12 +97,25 @@ public class CreatePositionHandler
             }
         }
 
-        var saveResult = await _departmentsRepository.SaveChanges(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
-            return saveResult.Error;
+            transactionScope.Rollback();
+
+            return saveResult.Error.ToErrors();
         }
+        
+        var commitResult = transactionScope.Commit();
+
+        if (commitResult.IsFailure)
+        {
+            transactionScope.Rollback();
+
+            return commitResult.Error.ToErrors();
+        }
+        
+        _logger.LogInformation("Position created with id={Id}", positionId.Value);
 
         return newPosition.Value.Id.Value;
     }
