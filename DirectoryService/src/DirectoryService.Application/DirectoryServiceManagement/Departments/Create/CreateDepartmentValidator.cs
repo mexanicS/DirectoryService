@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using DirectoryService.Application.DirectoryServiceManagement.DTOs;
+﻿using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using FluentValidation;
@@ -21,4 +20,4 @@ public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentDto>
             .Must(locations => locations.Distinct().Count() == locations.Length)
             .WithMessage("Список локаций содержит дубликаты");
     }
-}
+}    

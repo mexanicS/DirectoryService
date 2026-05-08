@@ -1,8 +1,5 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.Validation;
@@ -20,16 +17,19 @@ public class CreatePositionHandler
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILogger<CreatePositionHandler> _logger;
     private readonly IValidator<CreatePositionDto> _validator;
+    private readonly ITransactionManager _transactionManager;
 
     public CreatePositionHandler(IPositionsRepository positionsRepository,
         IDepartmentsRepository departmentsRepository,
         ILogger<CreatePositionHandler> logger,
-        IValidator<CreatePositionDto> validator)
+        IValidator<CreatePositionDto> validator,
+        ITransactionManager transactionManager)
     {
         _positionsRepository = positionsRepository;
         _departmentsRepository = departmentsRepository;
         _logger = logger;
         _validator = validator;
+        _transactionManager = transactionManager;
     }
 
     public async Task<Result<Guid, Errors>> Handle(
@@ -41,6 +41,14 @@ public class CreatePositionHandler
         {
             return validationResult.ToErrors();
         }
+        
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        
+        if (transactionScopeResult.IsFailure)
+            return transactionScopeResult.Error.ToErrors();
+
+        var transactionScope = transactionScopeResult.Value;
+        
         var positionId = new PositionId(Guid.NewGuid());
         var positionName = PositionName.Create(createPositionDto.Name).Value;
         var description = Description.Create(createPositionDto.Description).Value;
@@ -65,30 +73,49 @@ public class CreatePositionHandler
         {
             return addPositionResult.Error;
         }
+        
+        var departmentsResult = await _departmentsRepository
+            .GetByIdsWithPositions(departmentIds, cancellationToken);
 
-        foreach (var departmentId in createPositionDto.DepartmentIds)
+        if (departmentsResult.IsFailure)
         {
-            var departmentResult = await _departmentsRepository
-                .GetByIdWithPositions(new DepartmentId(departmentId), cancellationToken);
-
-            if (departmentResult.IsFailure)
+            return departmentsResult.Error.ToErrors();
+        }
+        
+        var missingIds = departmentIds.Except(departmentsResult.Value.Select(d => d.Id.Value)).ToList();
+        if (missingIds.Any())
+        {
+            return GeneralErrors.NotFound(missingIds, nameof(Department)).ToErrors();
+        }
+        
+        foreach (var department in departmentsResult.Value)
+        {
+            var result = department.AddPosition(positionId.Value);
+            if (result.IsFailure)
             {
-                return departmentResult.Error.ToErrors();
-            }
-
-            var addPositionToDepartmentResult = departmentResult.Value.AddPosition(positionId.Value);
-            if (addPositionToDepartmentResult.IsFailure)
-            {
-                return addPositionToDepartmentResult.Error.ToErrors();
+                return result.Error.ToErrors();
             }
         }
 
-        var saveResult = await _departmentsRepository.SaveChanges(cancellationToken);
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
-            return saveResult.Error;
+            transactionScope.Rollback();
+
+            return saveResult.Error.ToErrors();
         }
+        
+        var commitResult = transactionScope.Commit();
+
+        if (commitResult.IsFailure)
+        {
+            transactionScope.Rollback();
+
+            return commitResult.Error.ToErrors();
+        }
+        
+        _logger.LogInformation("Position created with id={Id}", positionId.Value);
 
         return newPosition.Value.Id.Value;
     }

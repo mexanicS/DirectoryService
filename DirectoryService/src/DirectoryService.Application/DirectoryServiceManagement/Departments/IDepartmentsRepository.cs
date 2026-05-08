@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
+using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using SharedKernel;
 
@@ -20,4 +17,14 @@ public interface IDepartmentsRepository
         CancellationToken cancellationToken);
     
     Task<Result<bool, Errors>> SaveChanges(CancellationToken cancellationToken);
+    
+    Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id, 
+        CancellationToken cancellationToken);
+
+    Task DeleteLocationsByDepartmentId(Guid id, CancellationToken cancellationToken);
+    
+    Task AddDepartmentLocations(IEnumerable<DepartmentLocation> departmentLocations, CancellationToken cancellationToken);
+
+    Task<Result<IReadOnlyList<Department>, Error>> GetByIdsWithPositions(List<Guid> ids,
+        CancellationToken cancellationToken);
 }

@@ -1,7 +1,5 @@
 ﻿namespace DirectoryService.Application.DirectoryServiceManagement.DTOs;
 
-public record CreateDepartmentDto(
-    string Name,
-    string Identifier,
-    Guid? ParentId,
+public record UpdateLocationsByDepartmentDto(
+    Guid DepartmentId, 
     Guid[] LocationIds);

@@ -27,6 +27,11 @@ public static class GeneralErrors
         string forId = id == null ? string.Empty : $" по Id '{id}'";
         return Error.NotFound("record.not.found", $"{name ?? "запись"} не найдена{forId}");
     }
+    
+    public static Error NotFound(List<Guid> ids, string? name = null)
+    {
+        return Error.NotFound("records.not.found", $"{name ?? "записи"} не найдены по Id = {string.Join(", ", ids)}");
+    }
 
     public static Error ValueIsRequired(string? name = null)
     {

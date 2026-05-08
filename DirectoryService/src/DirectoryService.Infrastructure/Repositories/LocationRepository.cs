@@ -72,4 +72,34 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
             ? true
             : Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
     }
+    
+    public async Task<Result<Location, Error>> GetById(Guid locationId, CancellationToken cancellationToken)
+    {
+        var location = await _context.Locations
+            .FirstOrDefaultAsync(d => d.Id == locationId && d.IsActive, cancellationToken);
+
+        if (location is null)
+        {
+            return GeneralErrors.NotFound(locationId, nameof(Location));
+        }
+
+        return location;
+    }
+    
+    public async Task<Result<IReadOnlyList<Location>, Error>> GetActiveLocationsById(IEnumerable<Guid> locationsId,
+        CancellationToken cancellationToken)
+    {
+        var locationIds = locationsId.Distinct().ToArray();
+        var expectedCount = locationIds.Length;
+
+        var actualCount = await _context.Locations
+            .CountAsync(l => locationIds.Contains(l.Id) && l.IsActive, cancellationToken);
+
+        if (expectedCount == actualCount)
+        {
+            var location = await _context.Locations.Where(l => locationIds.Contains(l.Id) && l.IsActive).ToListAsync(cancellationToken);
+            return location;
+        }
+        return Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
+    }
 }

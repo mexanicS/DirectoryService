@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using SharedKernel;
 
 namespace DirectoryService.Application.Validation;
