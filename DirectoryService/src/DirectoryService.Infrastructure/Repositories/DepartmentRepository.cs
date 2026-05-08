@@ -47,7 +47,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         var department =
             await _context.Departments.FirstOrDefaultAsync(d => d.Id == parentId && d.IsActive, cancellationToken);
 
-        if (department == null)
+        if (department is null)
         {
             return GeneralErrors.NotFound(parentId, nameof(Department));
         }

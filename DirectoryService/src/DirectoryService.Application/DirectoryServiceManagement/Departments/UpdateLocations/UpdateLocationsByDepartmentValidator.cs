@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Linq;
-using DirectoryService.Application.DirectoryServiceManagement.DTOs;
+﻿using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;

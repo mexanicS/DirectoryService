@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.DepartmentLocations;
-using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -91,6 +85,8 @@ public class UpdateLocationsByDepartmentHandler
 
             return commitResult.Error.ToErrors();
         }
+        
+        _logger.LogInformation("Department with id={Id}, has updated locations", updateDepartmentDto.DepartmentId);
         
         return department.Value.Id.Value;
     }

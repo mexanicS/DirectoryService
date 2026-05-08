@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
