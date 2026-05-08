@@ -61,22 +61,27 @@ public class CreatePositionHandler
         {
             return addPositionResult.Error;
         }
+        
+        var departmentsResult = await _departmentsRepository
+            .GetByIdsWithPositions(departmentIds, cancellationToken);
 
-        foreach (var departmentId in createPositionDto.DepartmentIds)
+        if (departmentsResult.IsFailure)
         {
-            //TODO: переделать на один запрос
-            var departmentResult = await _departmentsRepository
-                .GetByIdWithPositions(new DepartmentId(departmentId), cancellationToken);
-
-            if (departmentResult.IsFailure)
+            return departmentsResult.Error.ToErrors();
+        }
+        
+        var missingIds = departmentIds.Except(departmentsResult.Value.Select(d => d.Id.Value)).ToList();
+        if (missingIds.Any())
+        {
+            return GeneralErrors.NotFound(missingIds, nameof(Department)).ToErrors();
+        }
+        
+        foreach (var department in departmentsResult.Value)
+        {
+            var result = department.AddPosition(positionId.Value);
+            if (result.IsFailure)
             {
-                return departmentResult.Error.ToErrors();
-            }
-
-            var addPositionToDepartmentResult = departmentResult.Value.AddPosition(positionId.Value);
-            if (addPositionToDepartmentResult.IsFailure)
-            {
-                return addPositionToDepartmentResult.Error.ToErrors();
+                return result.Error.ToErrors();
             }
         }
 

@@ -120,4 +120,19 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
     {
         await _context.DepartmentLocations.AddRangeAsync(departmentLocations, cancellationToken);
     }
+    
+    public async Task<Result<IReadOnlyList<Department>, Error>> GetByIdsWithPositions(List<Guid> ids, CancellationToken cancellationToken)
+    {
+        var departments = _context.Departments
+            .Include(d => d.DepartmentPositions)
+            .Where(d => ids.Contains(d.Id) && d.IsActive);
+        
+        if (!await departments.AnyAsync(cancellationToken))
+        {
+            var massingId = await departments.Select(d => d.Id.Value).ToListAsync(cancellationToken);
+            return GeneralErrors.NotFound(massingId, nameof(Department));
+        }
+        
+        return await departments.ToListAsync(cancellationToken);
+    }
 }

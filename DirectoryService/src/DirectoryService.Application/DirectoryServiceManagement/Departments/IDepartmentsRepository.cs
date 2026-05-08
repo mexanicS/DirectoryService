@@ -24,4 +24,7 @@ public interface IDepartmentsRepository
     Task DeleteLocationsByDepartmentId(Guid id, CancellationToken cancellationToken);
     
     Task AddDepartmentLocations(IEnumerable<DepartmentLocation> departmentLocations, CancellationToken cancellationToken);
+
+    Task<Result<IReadOnlyList<Department>, Error>> GetByIdsWithPositions(List<Guid> ids,
+        CancellationToken cancellationToken);
 }
