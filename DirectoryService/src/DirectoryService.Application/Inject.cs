@@ -1,4 +1,5 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using FluentValidation;
@@ -13,6 +14,7 @@ public static class Inject
         services.AddScoped<CreateLocationHandler>();
         services.AddScoped<CreateDepartmentHandler>();
         services.AddScoped<CreatePositionHandler>();
+        services.AddScoped<UpdateLocationsByDepartmentHandler>();
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         
