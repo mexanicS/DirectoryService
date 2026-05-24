@@ -98,8 +98,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
     {
         var department = await _context.Departments
             .Include(d => d.DepartmentLocations)
-            .FirstOrDefaultAsync(d => d.Id == id && d.IsActive, cancellationToken);
-
+            .FirstOrDefaultAsync(d => d.Id == id && d.IsActive, cancellationToken);\\\\\\\\\\\\\\\оо
         if (department is null)
         {
             return GeneralErrors.NotFound(id.Value, nameof(Department));
@@ -134,5 +133,24 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         }
         
         return await departments.ToListAsync(cancellationToken);
+    }
+    
+    public async Task<Result<Department, Error>> GetByIdWithLockAsync(DepartmentId departmentId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var department = await _context.Departments
+                .FromSql($"SELECT * FROM departments WHERE id = {departmentId.Value} FOR UPDATE")
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return department != null
+                ? department
+                : GeneralErrors.NotFound(departmentId, nameof(Department));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while getting department");
+            return GeneralErrors.Failure();
+        }
     }
 }
