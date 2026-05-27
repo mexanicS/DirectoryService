@@ -1,9 +1,10 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
-using DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Presentation.Controllers.Requests;
@@ -48,7 +49,19 @@ public class DirectoryServiceController : ControllerBase
         [FromRoute] Guid locationId,
         CancellationToken cancellationToken = default)
     {
-        var command = new LinkDepartmentAndLocationCommand(departmentId, locationId);
+        var command = new DepartmentAndLocationCommand(departmentId, locationId);
+        
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpDelete("api/departments/{departmentId:guid}/locations/{locationId:guid}")]
+    public async Task<EndpointResult<Guid>> UnLinkDepartmentAndLocation(
+        [FromServices] UnLinkDepartmentAndLocationHandler handler,
+        [FromRoute] Guid departmentId,
+        [FromRoute] Guid locationId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new DepartmentAndLocationCommand(departmentId, locationId);
         
         return await handler.Handle(command, cancellationToken);
     }

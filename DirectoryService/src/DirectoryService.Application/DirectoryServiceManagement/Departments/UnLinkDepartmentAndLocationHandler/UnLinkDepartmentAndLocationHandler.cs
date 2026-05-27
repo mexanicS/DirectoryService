@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DataBase;
-using DirectoryService.Application.DirectoryServiceManagement.Departments;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
+using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
@@ -9,20 +10,20 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
-namespace DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
+namespace DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 
-public class LinkDepartmentAndLocationHandler
+public class UnLinkDepartmentAndLocationHandler
 {
     private readonly ILocationsRepository _locationsRepository;
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILogger<LinkDepartmentAndLocationHandler> _logger;
-    private readonly IValidator<LinkDepartmentAndLocationCommand> _validator;
+    private readonly IValidator<DepartmentAndLocationCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
-    public LinkDepartmentAndLocationHandler(ILocationsRepository locationsRepository,
+    public UnLinkDepartmentAndLocationHandler(ILocationsRepository locationsRepository,
         IDepartmentsRepository departmentsRepository,
         ILogger<LinkDepartmentAndLocationHandler> logger,
-        IValidator<LinkDepartmentAndLocationCommand> validator,
+        IValidator<DepartmentAndLocationCommand> validator,
         ITransactionManager  transactionManager
         )
     {
@@ -33,16 +34,16 @@ public class LinkDepartmentAndLocationHandler
         _transactionManager = transactionManager;
     }
 
-    public async Task<Result<Guid, Errors>> Handle(LinkDepartmentAndLocationCommand linkDepartmentAndLocationCommand, 
+    public async Task<Result<Guid, Errors>> Handle(DepartmentAndLocationCommand departmentAndLocationCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(linkDepartmentAndLocationCommand, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(departmentAndLocationCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
-        var locationId = new LocationId(linkDepartmentAndLocationCommand.LocationId);
-        var departmentId = new DepartmentId(linkDepartmentAndLocationCommand.DepartmentId);
+        var locationId = new LocationId(departmentAndLocationCommand.LocationId);
+        var departmentId = new DepartmentId(departmentAndLocationCommand.DepartmentId);
         
         var locationExistsResult = await _locationsRepository.ExistsActiveLocationById(locationId, cancellationToken);
         if (locationExistsResult.IsFailure)
@@ -56,26 +57,16 @@ public class LinkDepartmentAndLocationHandler
             return departmentExistsResult.Error.ToErrors();
         }
         
-        var linkDepartmentAndLocationResult = await _departmentsRepository.LinkDepartmentAndLocation(departmentId, locationId, cancellationToken);
+        var linkDepartmentAndLocationResult = await _departmentsRepository.ExistsLinkDepartmentAndLocation(departmentId, locationId, cancellationToken);
 
-        if (linkDepartmentAndLocationResult.IsFailure)
+        if (!linkDepartmentAndLocationResult.Value)
         {
-            return GeneralErrors.AlreadyExist("Department and Location already linked").ToErrors();
+            return GeneralErrors.AlreadyExist("Department and Location not linked").ToErrors();
         }
 
-        var departmentLocations = DepartmentLocation.Create(departmentId, locationId);
+        await _departmentsRepository.DeleteLocationsByDepartmentId(departmentId, cancellationToken);
         
-        await _departmentsRepository.AddDepartmentLocations(departmentLocations.Value, cancellationToken);
-        
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
-
-        if (saveResult.IsFailure)
-        {
-            return saveResult.Error.ToErrors();
-        }
-        
-        _logger.LogInformation("Location with id {locationId} and department with id {departmentId} linked", locationId.Value, departmentId.Value);
-        
+        _logger.LogInformation("Location with id {locationId} and department with id {departmentId} unlinked", locationId.Value, departmentId.Value);
         
         return locationId.Value;
     }

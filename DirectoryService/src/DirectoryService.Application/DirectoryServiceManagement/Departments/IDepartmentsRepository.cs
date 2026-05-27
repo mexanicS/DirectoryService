@@ -35,6 +35,6 @@ public interface IDepartmentsRepository
 
     Task<Result<bool, Error>> ExistsActiveDepartmentById(DepartmentId departmentId, CancellationToken cancellationToken);
 
-    Task<Result<bool, Error>> LinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
+    Task<Result<bool>> ExistsLinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
         CancellationToken cancellationToken);
 }

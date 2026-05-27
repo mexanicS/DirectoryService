@@ -158,17 +158,10 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         return foundDepartment;
     }
 
-    public async Task<Result<bool, Error>> LinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
+    public async Task<Result<bool>> ExistsLinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
         CancellationToken cancellationToken)
     {
-        var foundDepartment = await _context.DepartmentLocations.AnyAsync(
+        return await _context.DepartmentLocations.AnyAsync(
             dl => dl.DepartmentId == departmentId && dl.LocationId == locationId, cancellationToken);
-
-        if (foundDepartment)
-        {
-            return GeneralErrors.AlreadyExist();
-        }
-        
-        return foundDepartment;
     }
 }

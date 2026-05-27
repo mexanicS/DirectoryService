@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 
-namespace DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
+namespace DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 
-public class LinkDepartmentAndLocationDtoValidator : AbstractValidator<LinkDepartmentAndLocationCommand>
+public class LinkDepartmentAndLocationDtoValidator : AbstractValidator<DepartmentAndLocationCommand>
 {
     public LinkDepartmentAndLocationDtoValidator()
     {
