@@ -6,6 +6,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
+using DirectoryService.Presentation.Controllers.Requests;
 using DirectoryService.Presentation.EndpointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,14 +29,15 @@ public class DirectoryServiceController : ControllerBase
         return await handler.Handle(request, cancellationToken);
     }
     
-    [HttpPatch("/api/locations/{id:guid}")]
+    [HttpPatch("/api/locations/{locationId:guid}")]
     public async Task<EndpointResult<Guid>> UpdateLocation(
         [FromServices] UpdateLocationHandler handler,
-        [FromBody] UpdateLocationDto request,
-        [FromRoute] Guid id,
+        [FromBody] UpdateLocationRequest request,
+        [FromRoute] Guid locationId,
         CancellationToken cancellationToken = default)
     {
-        var command = request with { LocationId = id };
+        var command = new UpdateLocationCommand(locationId, request.LocationName, request.Address, request.Timezone); 
+        
         return await handler.Handle(command, cancellationToken);
     }
     
@@ -46,7 +48,8 @@ public class DirectoryServiceController : ControllerBase
         [FromRoute] Guid locationId,
         CancellationToken cancellationToken = default)
     {
-        var command = new LinkDepartmentAndLocationDto(departmentId, locationId);
+        var command = new LinkDepartmentAndLocationCommand(departmentId, locationId);
+        
         return await handler.Handle(command, cancellationToken);
     }
 
@@ -59,14 +62,15 @@ public class DirectoryServiceController : ControllerBase
         return await handler.Handle(request, cancellationToken);
     }
     
-    [HttpPatch("/api/departments/{id:guid}")]
+    [HttpPatch("/api/departments/{departmentId:guid}")]
     public async Task<EndpointResult<Guid>> UpdateDepartment(
         [FromServices] UpdateDepartmentHandler handler,
-        [FromBody] UpdateDepartmentDto request, 
-        [FromRoute] Guid id,
+        [FromBody] UpdateDepartmentRequest request, 
+        [FromRoute] Guid departmentId,
         CancellationToken cancellationToken = default)
     {
-        var command = request with { DepartmentId = id };
+        var command = new UpdateDepartmentCommand(departmentId, request.Name, request.Identifier);
+        
         return await handler.Handle(command, cancellationToken);
     }
     
@@ -79,13 +83,16 @@ public class DirectoryServiceController : ControllerBase
         return await handler.Handle(request, cancellationToken);
     }
     
-    [HttpPut("/api/departments/{departmentId}/locations")]
+    [HttpPut("/api/departments/{departmentId:guid}/locations")]
     public async Task<EndpointResult<Guid>> UpdateLocations(
         [FromServices] UpdateLocationsByDepartmentHandler handler,
-        [FromBody] UpdateLocationsByDepartmentDto request, 
+        [FromBody] UpdateLocationsByDepartmentRequest request,
+        [FromRoute] Guid departmentId, 
         CancellationToken cancellationToken = default)
     {
-        return await handler.Handle(request, cancellationToken);
+        var command = new UpdateLocationsByDepartmentCommand(departmentId, request.LocationIds);
+        
+        return await handler.Handle(command, cancellationToken);
     }
     
 }

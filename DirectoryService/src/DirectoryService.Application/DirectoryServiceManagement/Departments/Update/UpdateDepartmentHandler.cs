@@ -16,13 +16,13 @@ public class UpdateDepartmentHandler
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILocationsRepository _locationsRepository;
     private readonly ILogger<UpdateDepartmentHandler> _logger;
-    private readonly IValidator<UpdateDepartmentDto> _validator;
+    private readonly IValidator<UpdateDepartmentCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public UpdateDepartmentHandler(IDepartmentsRepository departmentsRepository,
         ILocationsRepository locationsRepository,
         ILogger<UpdateDepartmentHandler> logger,
-        IValidator<UpdateDepartmentDto> validator,
+        IValidator<UpdateDepartmentCommand> validator,
         ITransactionManager transactionManager)
     {
         _departmentsRepository = departmentsRepository;
@@ -33,28 +33,28 @@ public class UpdateDepartmentHandler
     }
 
     public async Task<Result<Guid, Errors>> Handle(
-        UpdateDepartmentDto updateDepartmentDto,
+        UpdateDepartmentCommand updateDepartmentCommand,
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updateDepartmentDto, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(updateDepartmentCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
 
-        var department = await _departmentsRepository.GetById(updateDepartmentDto.DepartmentId, cancellationToken);
+        var department = await _departmentsRepository.GetById(updateDepartmentCommand.DepartmentId, cancellationToken);
         if (department.IsFailure)
         {
             return department.Error.ToErrors();
         }
 
-        var name = DepartmentName.Create(updateDepartmentDto.Name);
+        var name = DepartmentName.Create(updateDepartmentCommand.Name);
         if (name.IsFailure)
         {
             return name.Error.ToErrors();
         }
 
-        var identifier = Identifier.Create(updateDepartmentDto.Identifier);
+        var identifier = Identifier.Create(updateDepartmentCommand.Identifier);
         if (identifier.IsFailure)
         {
             return identifier.Error.ToErrors();
@@ -69,7 +69,7 @@ public class UpdateDepartmentHandler
             return saveResult.Error.ToErrors();
         }
 
-        _logger.LogInformation("Department with id={Id}, has updated", updateDepartmentDto.DepartmentId);
+        _logger.LogInformation("Department with id={Id}, has updated", updateDepartmentCommand.DepartmentId);
 
         return department.Value.Id.Value;
     }

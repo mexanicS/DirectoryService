@@ -13,12 +13,12 @@ public class UpdateLocationHandler
 {
     private readonly ILocationsRepository _locationsRepository;
     private readonly ILogger<UpdateLocationHandler> _logger;
-    private readonly IValidator<UpdateLocationDto> _validator;
+    private readonly IValidator<UpdateLocationCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public UpdateLocationHandler(ILocationsRepository locationsRepository,
         ILogger<UpdateLocationHandler> logger,
-        IValidator<UpdateLocationDto> validator,
+        IValidator<UpdateLocationCommand> validator,
         ITransactionManager transactionManager)
     {
         _locationsRepository = locationsRepository;
@@ -27,16 +27,16 @@ public class UpdateLocationHandler
         _transactionManager = transactionManager;
     }
 
-    public async Task<Result<Guid, Errors>> Handle(UpdateLocationDto updateLocationDto, 
+    public async Task<Result<Guid, Errors>> Handle(UpdateLocationCommand updateLocationCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updateLocationDto, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(updateLocationCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
         
-        var locationCreateResult = CreateLocation(updateLocationDto);
+        var locationCreateResult = CreateLocation(updateLocationCommand);
         
         var existsByAddress = await _locationsRepository
             .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
@@ -68,19 +68,19 @@ public class UpdateLocationHandler
         return locationCreateResult.Value.Id.Value;
     }
     
-    private Result<Location> CreateLocation(UpdateLocationDto createLocationDto)
+    private Result<Location> CreateLocation(UpdateLocationCommand createLocationCommand)
     {
-        var id = new LocationId(createLocationDto.LocationId);
+        var id = new LocationId(createLocationCommand.LocationId);
         
-        var locationName = LocationName.Create(createLocationDto.LocationName);
+        var locationName = LocationName.Create(createLocationCommand.LocationName);
         
         var address = Address.Create(
-            createLocationDto.Address.City, 
-            createLocationDto.Address.Street,
-            createLocationDto.Address.HouseNumber, 
-            createLocationDto.Address.ZipCode);
+            createLocationCommand.Address.City, 
+            createLocationCommand.Address.Street,
+            createLocationCommand.Address.HouseNumber, 
+            createLocationCommand.Address.ZipCode);
        
-        var timezone = Timezone.Create(createLocationDto.Timezone);
+        var timezone = Timezone.Create(createLocationCommand.Timezone);
         
         var location = Location.Create(id,
             locationName.Value,

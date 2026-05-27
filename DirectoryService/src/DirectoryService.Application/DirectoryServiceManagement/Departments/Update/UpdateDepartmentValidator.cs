@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 
-public class UpdateDepartmentValidator : AbstractValidator<UpdateDepartmentDto>
+public class UpdateDepartmentValidator : AbstractValidator<UpdateDepartmentCommand>
 {
     public UpdateDepartmentValidator()
     {

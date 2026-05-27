@@ -19,13 +19,13 @@ public class UpdateLocationsByDepartmentHandler
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILocationsRepository _locationsRepository;
     private readonly ILogger<UpdateLocationsByDepartmentHandler> _logger;
-    private readonly IValidator<UpdateLocationsByDepartmentDto> _validator;
+    private readonly IValidator<UpdateLocationsByDepartmentCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public UpdateLocationsByDepartmentHandler(IDepartmentsRepository departmentsRepository,
         ILocationsRepository locationsRepository,
         ILogger<UpdateLocationsByDepartmentHandler> logger,
-        IValidator<UpdateLocationsByDepartmentDto> validator, 
+        IValidator<UpdateLocationsByDepartmentCommand> validator, 
         ITransactionManager transactionManager)
     {
         _departmentsRepository = departmentsRepository;
@@ -36,10 +36,10 @@ public class UpdateLocationsByDepartmentHandler
     }
 
     public async Task<Result<Guid, Errors>> Handle(
-        UpdateLocationsByDepartmentDto updateDepartmentDto,
+        UpdateLocationsByDepartmentCommand updateDepartmentCommand,
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updateDepartmentDto, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(updateDepartmentCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -52,13 +52,13 @@ public class UpdateLocationsByDepartmentHandler
 
         var transactionScope = transactionScopeResult.Value;
         
-        var department = await _departmentsRepository.GetById(updateDepartmentDto.DepartmentId, cancellationToken);
+        var department = await _departmentsRepository.GetById(updateDepartmentCommand.DepartmentId, cancellationToken);
         if (department.IsFailure)
         {
             return department.Error.ToErrors();
         }
         
-        var locationExists = await _locationsRepository.GetActiveLocationsById(updateDepartmentDto.LocationIds, cancellationToken);
+        var locationExists = await _locationsRepository.GetActiveLocationsById(updateDepartmentCommand.LocationIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();
@@ -90,7 +90,7 @@ public class UpdateLocationsByDepartmentHandler
             return commitResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Department with id={Id}, has updated locations", updateDepartmentDto.DepartmentId);
+        _logger.LogInformation("Department with id={Id}, has updated locations", updateDepartmentCommand.DepartmentId);
         
         return department.Value.Id.Value;
     }

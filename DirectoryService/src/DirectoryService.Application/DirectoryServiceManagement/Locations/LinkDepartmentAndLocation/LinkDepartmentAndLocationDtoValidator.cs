@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
 
-public class LinkDepartmentAndLocationDtoValidator : AbstractValidator<LinkDepartmentAndLocationDto>
+public class LinkDepartmentAndLocationDtoValidator : AbstractValidator<LinkDepartmentAndLocationCommand>
 {
     public LinkDepartmentAndLocationDtoValidator()
     {

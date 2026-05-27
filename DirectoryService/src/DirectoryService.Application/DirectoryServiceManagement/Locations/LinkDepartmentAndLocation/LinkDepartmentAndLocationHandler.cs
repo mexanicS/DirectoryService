@@ -17,13 +17,13 @@ public class LinkDepartmentAndLocationHandler
     private readonly ILocationsRepository _locationsRepository;
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILogger<LinkDepartmentAndLocationHandler> _logger;
-    private readonly IValidator<LinkDepartmentAndLocationDto> _validator;
+    private readonly IValidator<LinkDepartmentAndLocationCommand> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public LinkDepartmentAndLocationHandler(ILocationsRepository locationsRepository,
         IDepartmentsRepository departmentsRepository,
         ILogger<LinkDepartmentAndLocationHandler> logger,
-        IValidator<LinkDepartmentAndLocationDto> validator,
+        IValidator<LinkDepartmentAndLocationCommand> validator,
         ITransactionManager  transactionManager
         )
     {
@@ -34,16 +34,16 @@ public class LinkDepartmentAndLocationHandler
         _transactionManager = transactionManager;
     }
 
-    public async Task<Result<Guid, Errors>> Handle(LinkDepartmentAndLocationDto linkDepartmentAndLocationDto, 
+    public async Task<Result<Guid, Errors>> Handle(LinkDepartmentAndLocationCommand linkDepartmentAndLocationCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(linkDepartmentAndLocationDto, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(linkDepartmentAndLocationCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
-        var locationId = new LocationId(linkDepartmentAndLocationDto.LocationId);
-        var departmentId = new DepartmentId(linkDepartmentAndLocationDto.DepartmentId);
+        var locationId = new LocationId(linkDepartmentAndLocationCommand.LocationId);
+        var departmentId = new DepartmentId(linkDepartmentAndLocationCommand.DepartmentId);
         
         var locationExistsResult = await _locationsRepository.ExistsActiveLocationById(locationId, cancellationToken);
         if (locationExistsResult.IsFailure)

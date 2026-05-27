@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 
-public class UpdateLocationValidator : AbstractValidator<UpdateLocationDto>
+public class UpdateLocationValidator : AbstractValidator<UpdateLocationCommand>
 {
     public UpdateLocationValidator()
     {
