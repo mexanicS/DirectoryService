@@ -1,5 +1,4 @@
-﻿using DirectoryService.Application.DirectoryServiceManagement.DTOs;
-using DirectoryService.Application.Validation;
+﻿using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using FluentValidation;
 

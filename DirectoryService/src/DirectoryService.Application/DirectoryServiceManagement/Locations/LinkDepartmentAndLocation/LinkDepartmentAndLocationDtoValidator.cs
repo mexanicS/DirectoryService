@@ -1,5 +1,4 @@
-﻿using DirectoryService.Application.DirectoryServiceManagement.DTOs;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
 

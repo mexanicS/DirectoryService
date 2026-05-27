@@ -1,7 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DataBase;
-using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
-using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
