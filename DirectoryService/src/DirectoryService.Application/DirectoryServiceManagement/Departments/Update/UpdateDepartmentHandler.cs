@@ -15,13 +15,13 @@ public class UpdateDepartmentHandler
 {
     private readonly IDepartmentsRepository _departmentsRepository;
     private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<CreateDepartmentHandler> _logger;
+    private readonly ILogger<UpdateDepartmentHandler> _logger;
     private readonly IValidator<UpdateDepartmentDto> _validator;
     private readonly ITransactionManager _transactionManager;
 
     public UpdateDepartmentHandler(IDepartmentsRepository departmentsRepository,
         ILocationsRepository locationsRepository,
-        ILogger<CreateDepartmentHandler> logger,
+        ILogger<UpdateDepartmentHandler> logger,
         IValidator<UpdateDepartmentDto> validator,
         ITransactionManager transactionManager)
     {
@@ -60,7 +60,7 @@ public class UpdateDepartmentHandler
             return identifier.Error.ToErrors();
         }
 
-        var updateMainInformationResult = department.Value.UpdateMainInformation(name.Value, identifier.Value);
+        department.Value.UpdateMainInformation(name.Value, identifier.Value);
 
         var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
 

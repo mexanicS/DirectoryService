@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Domain.DepartmentLocations;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Locations;
 
@@ -50,4 +51,18 @@ public sealed class Location
     {
         return new Location(locationId, name, address, timezone);
     }
+    
+    public Result UpdateMainInformation(
+        LocationName name, 
+        Address address, 
+        Timezone timezone)
+    {
+        Name = name;
+        Address = address;
+        Timezone = timezone;
+        UpdatedAt = DateTime.UtcNow;
+        
+        return Result.Success();
+    }
+    
 }

@@ -41,14 +41,15 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
         }
     }
 
-    public async Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> ExistsActiveLocationByAddressAsync(Address address, CancellationToken cancellationToken)
     {
         var exists = await _context.Locations.AnyAsync(
             l =>
                 l.Address.City == address.City &&
                 l.Address.Street == address.Street &&
                 l.Address.HouseNumber == address.HouseNumber &&
-                l.Address.ZipCode == address.ZipCode,
+                l.Address.ZipCode == address.ZipCode &&
+                l.IsActive,
             cancellationToken);
         
         return exists;
