@@ -138,4 +138,15 @@ public sealed class Department
 
          return GeneralErrors.AlreadyExist();
      }
+     
+     public UnitResult<Error> UpdateMainInformation(DepartmentName departmentName,
+         Identifier identifier)
+     {
+         Name = departmentName;
+         Identifier = identifier;
+         UpdatedAt = DateTime.UtcNow;
+
+         return Result.Success<Error>();
+     }
+
 }

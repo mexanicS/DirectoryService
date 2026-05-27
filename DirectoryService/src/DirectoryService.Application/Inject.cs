@@ -1,4 +1,5 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
@@ -13,6 +14,7 @@ public static class Inject
     {
         services.AddScoped<CreateLocationHandler>();
         services.AddScoped<CreateDepartmentHandler>();
+        services.AddScoped<UpdateDepartmentHandler>();
         services.AddScoped<CreatePositionHandler>();
         services.AddScoped<UpdateLocationsByDepartmentHandler>();
         
