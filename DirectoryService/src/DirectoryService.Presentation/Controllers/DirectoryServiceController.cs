@@ -3,6 +3,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Presentation.EndpointResults;
@@ -35,6 +36,17 @@ public class DirectoryServiceController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var command = request with { LocationId = id };
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpPost("/api/departments/{departmentId:guid}/locations/{locationId:guid}")]
+    public async Task<EndpointResult<Guid>> LinkDepartmentAndLocation(
+        [FromServices] LinkDepartmentAndLocationHandler handler,
+        [FromRoute] Guid departmentId,
+        [FromRoute] Guid locationId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new LinkDepartmentAndLocationDto(departmentId, locationId);
         return await handler.Handle(command, cancellationToken);
     }
 

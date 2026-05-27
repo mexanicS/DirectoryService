@@ -57,7 +57,12 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
 
     public async Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken)
     {
-        return await _context.Locations.AnyAsync(l => l.Id == locationId && l.IsActive, cancellationToken);
+        var foundLocation = await _context.Locations.AnyAsync(l => l.Id == locationId && l.IsActive, cancellationToken);
+        if (!foundLocation)
+        {
+            return GeneralErrors.NotFound(locationId, nameof(Location));
+        }
+        return foundLocation;
     }
 
     public async Task<Result<bool, Error>> ExistsActiveLocationsById(IEnumerable<Guid> locationsId,

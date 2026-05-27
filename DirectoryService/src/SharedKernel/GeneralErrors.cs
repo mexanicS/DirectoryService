@@ -39,9 +39,9 @@ public static class GeneralErrors
         return Error.Validation("length.is.invalid", $"Поле{label}обязательно");
     }
 
-    public static Error AlreadyExist()
+    public static Error AlreadyExist(string message = "Запись уже существует")
     {
-        return Error.Validation("record.already.exist", "Запись уже существует");
+        return Error.Validation("record.already.exist", message);
     }
 
     public static Error Failure(string? message = null)

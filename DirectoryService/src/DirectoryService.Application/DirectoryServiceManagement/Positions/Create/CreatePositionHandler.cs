@@ -64,7 +64,7 @@ public class CreatePositionHandler
             return GeneralErrors.AlreadyExist().ToErrors();
         }
         
-        var locationExists = await _departmentsRepository.DepartmentExists(departmentIds, cancellationToken);
+        var locationExists = await _departmentsRepository.DepartmentsExists(departmentIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();

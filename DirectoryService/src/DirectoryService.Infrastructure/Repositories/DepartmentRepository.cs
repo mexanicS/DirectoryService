@@ -2,6 +2,7 @@ using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
+using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -19,7 +20,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         _context = context;
         _logger = logger;
     }
-    
+
     public async Task<Result<Guid, Errors>> Add(Department department,
         CancellationToken cancellationToken)
     {
@@ -27,7 +28,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         {
             await _context.Departments.AddAsync(department, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             return department.Id.Value;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
@@ -54,8 +55,8 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
 
         return department;
     }
-    
-    public async Task<Result<bool, Error>> DepartmentExists(IEnumerable<Guid> departmentIds,
+
+    public async Task<Result<bool, Error>> DepartmentsExists(IEnumerable<Guid> departmentIds,
         CancellationToken cancellationToken)
     {
         var departmentIdsDistinct = departmentIds.Distinct().ToArray();
@@ -69,7 +70,8 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
             : Error.NotFound("department.id", $"Found {actualCount}/{expectedCount} departments");
     }
 
-    public async Task<Result<Department, Error>> GetByIdWithPositions(DepartmentId id, CancellationToken cancellationToken)
+    public async Task<Result<Department, Error>> GetByIdWithPositions(DepartmentId id,
+        CancellationToken cancellationToken)
     {
         var department = await _context.Departments
             .Include(d => d.DepartmentPositions)
@@ -79,7 +81,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         {
             return GeneralErrors.NotFound(id.Value, nameof(Department));
         }
-        
+
         return department;
     }
 
@@ -94,7 +96,8 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         return saveResult.IsSuccess;
     }
 
-    public async Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id, CancellationToken cancellationToken)
+    public async Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id,
+        CancellationToken cancellationToken)
     {
         var department = await _context.Departments
             .Include(d => d.DepartmentLocations)
@@ -104,7 +107,7 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         {
             return GeneralErrors.NotFound(id.Value, nameof(Department));
         }
-        
+
         return department;
     }
 
@@ -121,18 +124,51 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         await _context.DepartmentLocations.AddRangeAsync(departmentLocations, cancellationToken);
     }
     
-    public async Task<Result<IReadOnlyList<Department>, Error>> GetByIdsWithPositions(List<Guid> ids, CancellationToken cancellationToken)
+    public async Task AddDepartmentLocations(DepartmentLocation departmentLocation,
+        CancellationToken cancellationToken)
+    {
+        await _context.DepartmentLocations.AddAsync(departmentLocation, cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyList<Department>, Error>> GetByIdsWithPositions(List<Guid> ids,
+        CancellationToken cancellationToken)
     {
         var departments = _context.Departments
             .Include(d => d.DepartmentPositions)
             .Where(d => ids.Contains(d.Id) && d.IsActive);
-        
+
         if (!await departments.AnyAsync(cancellationToken))
         {
             var massingId = await departments.Select(d => d.Id.Value).ToListAsync(cancellationToken);
             return GeneralErrors.NotFound(massingId, nameof(Department));
         }
-        
+
         return await departments.ToListAsync(cancellationToken);
+    }
+
+    public async Task<Result<bool, Error>> ExistsActiveDepartmentById(DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        var foundDepartment = await _context.Departments.AnyAsync(l => l.Id == departmentId && l.IsActive, cancellationToken);
+        if (!foundDepartment)
+        {
+            return GeneralErrors.NotFound(departmentId, nameof(Department));
+        }
+
+        return foundDepartment;
+    }
+
+    public async Task<Result<bool, Error>> LinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
+        CancellationToken cancellationToken)
+    {
+        var foundDepartment = await _context.DepartmentLocations.AnyAsync(
+            dl => dl.DepartmentId == departmentId && dl.LocationId == locationId, cancellationToken);
+
+        if (foundDepartment)
+        {
+            return GeneralErrors.AlreadyExist();
+        }
+        
+        return foundDepartment;
     }
 }
