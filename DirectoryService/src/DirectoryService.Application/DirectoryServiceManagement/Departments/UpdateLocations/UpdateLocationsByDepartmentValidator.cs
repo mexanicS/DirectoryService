@@ -1,9 +1,8 @@
-﻿using DirectoryService.Application.DirectoryServiceManagement.DTOs;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 
-public class UpdateLocationsByDepartmentValidator : AbstractValidator<UpdateLocationsByDepartmentDto>
+public class UpdateLocationsByDepartmentValidator : AbstractValidator<UpdateLocationsByDepartmentCommand>
 {
     public UpdateLocationsByDepartmentValidator() 
     {

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using DirectoryService.Domain.Locations;
 using SharedKernel;
@@ -13,11 +9,13 @@ public interface ILocationsRepository
     Task<Result<Guid, Error>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
-    Task<Result<bool, Error>> ExistsByAddressAsync(Address address, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> ExistsActiveLocationByAddressAsync(Address address, CancellationToken cancellationToken);
     
     Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken);
     
     Task<Result<bool, Error>> ExistsActiveLocationsById(IEnumerable<Guid> locationsId, CancellationToken cancellationToken);
+
+    Task<Result<Location, Error>> GetById(Guid locationId, CancellationToken cancellationToken);
 
     Task<Result<IReadOnlyList<Location>, Error>> GetActiveLocationsById(IEnumerable<Guid> locationsId,
         CancellationToken cancellationToken);

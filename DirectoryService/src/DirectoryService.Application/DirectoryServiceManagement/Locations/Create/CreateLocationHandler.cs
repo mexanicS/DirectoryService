@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
@@ -37,10 +34,10 @@ public class CreateLocationHandler
         
         var locationCreateResult = CreateLocation(createLocationDto);
         
-        var existsByName = await _locationsRepository
-            .ExistsByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
+        var existsByAddress = await _locationsRepository
+            .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
         
-        if (existsByName.Value)
+        if (existsByAddress.Value)
             return GeneralErrors.AlreadyExistByAddress().ToErrors();
 
         var addAsync = await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
