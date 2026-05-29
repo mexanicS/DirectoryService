@@ -108,4 +108,9 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
         }
         return Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
     }
+    
+    public void Delete(Location location)
+    {
+        _context.Locations.Remove(location);
+    }
 }

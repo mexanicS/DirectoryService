@@ -37,4 +37,10 @@ public interface IDepartmentsRepository
 
     Task<Result<bool>> ExistsLinkDepartmentAndLocation(DepartmentId departmentId, LocationId locationId,
         CancellationToken cancellationToken);
+
+    void Delete(Department department);
+
+    Task<Result<(Department Target, List<Department> Children), Error>> GetDepartmentWithChildren(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken);
 }

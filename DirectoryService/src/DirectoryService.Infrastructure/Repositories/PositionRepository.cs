@@ -37,13 +37,34 @@ public class PositionRepository : BaseRepository<Position>, IPositionsRepository
         }
     }
     
-
-    public async Task<Result<bool, Error>> IsActivePositionByName(PositionName positionName,
-        CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> IsActivePositionByName(
+        PositionName positionName,
+        CancellationToken cancellationToken,
+        Guid? excludePositionId = null)
     {
-        var positionExists = await _context.Positions
-            .AnyAsync(p => p.Name == positionName && p.IsActive, cancellationToken);
-        
-        return positionExists;
+        return await _context.Positions
+            .AnyAsync(p => 
+                    p.Name == positionName && 
+                    p.IsActive && 
+                    (excludePositionId == null || p.Id != excludePositionId),
+                cancellationToken);
+    }
+    
+    public async Task<Result<Position, Error>> GetById(Guid positionId, CancellationToken cancellationToken)
+    {
+        var position = await _context.Positions
+            .FirstOrDefaultAsync(d => d.Id == positionId && d.IsActive, cancellationToken);
+
+        if (position is null)
+        {
+            return GeneralErrors.NotFound(positionId, nameof(Position));
+        }
+
+        return position;
+    }
+
+    public void Delete(Position position)
+    {
+        _context.Positions.Remove(position);
     }
 }

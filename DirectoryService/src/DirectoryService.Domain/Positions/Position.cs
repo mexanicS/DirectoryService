@@ -44,4 +44,13 @@ public sealed class Position
     {
         return new Position(positionId, name, description);
     }
+    
+    public void UpdateMainInformation(
+        PositionName name, 
+        Description description)
+    {
+        Name = name;
+        Description = description;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

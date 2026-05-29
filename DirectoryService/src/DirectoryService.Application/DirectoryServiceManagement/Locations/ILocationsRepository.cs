@@ -19,4 +19,6 @@ public interface ILocationsRepository
 
     Task<Result<IReadOnlyList<Location>, Error>> GetActiveLocationsById(IEnumerable<Guid> locationsId,
         CancellationToken cancellationToken);
+
+    void Delete(Location location);
 }

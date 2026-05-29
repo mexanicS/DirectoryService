@@ -148,5 +148,58 @@ public sealed class Department
 
          return Result.Success();
      }
+     public void MoveUpInHierarchy(string oldParentPath, string newParentPath, DepartmentId? newParentId)
+     {
+         var currentDepthValue = Depth.Value;
+         if (currentDepthValue > 0)
+         {
+             Depth = DepartmentDepth.Create(currentDepthValue - 1).Value;
+         }
 
+         string currentPathValue = Path.Value;
+         if (currentPathValue.StartsWith(oldParentPath))
+         {
+             string updatedPath = currentPathValue.Replace(oldParentPath, newParentPath);
+             Path = Path.Create(updatedPath).Value;
+         }
+
+         if (ParentId == newParentId) 
+         {
+             ParentId = newParentId; 
+         }
+        
+         UpdatedAt = DateTime.UtcNow;
+     }
+     
+     public void UpdateParent(DepartmentId? newParentId)
+     {
+         ParentId = newParentId;
+         UpdatedAt = DateTime.UtcNow;
+     }
+     
+     public string GetParentPathValue()
+     {
+         if (ParentId is null || string.IsNullOrEmpty(Path.Value))
+         {
+             return string.Empty;
+         }
+
+         var lastDotIndex = Path.Value.LastIndexOf('/');
+         return lastDotIndex == -1 ? string.Empty : Path.Value.Substring(0, lastDotIndex);
+     }
+     
+     public UnitResult<Error> RemovePosition(Guid positionId)
+     {
+         var departmentPosition = _departmentPositions
+             .FirstOrDefault(x => x.PositionId.Value == positionId);
+
+         if (departmentPosition is null)
+         {
+             return GeneralErrors.NotFound(positionId, nameof(DepartmentPosition));
+         }
+
+         _departmentPositions.Remove(departmentPosition);
+
+         return Result.Success<Error>();
+     }
 }

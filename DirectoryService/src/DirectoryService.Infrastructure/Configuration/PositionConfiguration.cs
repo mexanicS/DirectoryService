@@ -42,5 +42,10 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
 
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("update_at");
+        
+        builder.HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.PositionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -66,7 +66,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 
         builder.HasMany(x => x.DepartmentLocations)
             .WithOne()
-            .HasForeignKey(x => x.LocationId);
+            .HasForeignKey(x => x.LocationId)
+            .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasIndex(x => x.Name).IsUnique();
     }
