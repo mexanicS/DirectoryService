@@ -1,4 +1,4 @@
-﻿namespace DirectoryService.Presentation.Controllers;
+﻿namespace DirectoryService.Presentation.Requests;
 
 public record UpdatePositionRequest(
     string Name,
