@@ -7,8 +7,8 @@ using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
-using DirectoryService.Presentation.Controllers.Requests;
 using DirectoryService.Presentation.EndpointResults;
+using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DirectoryService.Presentation.Controllers;

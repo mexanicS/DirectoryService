@@ -30,8 +30,4 @@
       <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Requests\Location\" />
-    </ItemGroup>
-
 </Project>
