@@ -1,6 +1,8 @@
 using DirectoryService.Application;
 using DirectoryService.Infrastructure;
-using DirectoryService.Presentation.Controllers;
+using DirectoryService.Presentation.Controllers.DepartmentsController;
+using DirectoryService.Presentation.Controllers.LocationsController;
+using DirectoryService.Presentation.Controllers.PositionsController;
 using DirectoryService.Presentation.Middlewares;
 using Serilog;
 using Serilog.Events;
@@ -21,7 +23,9 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(DirectoryServiceController).Assembly);
+    .AddApplicationPart(typeof(DepartmentController).Assembly)
+    .AddApplicationPart(typeof(LocationController).Assembly)
+    .AddApplicationPart(typeof(PositionController).Assembly);
 
 builder.Services.AddOpenApi();
 
