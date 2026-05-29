@@ -35,8 +35,6 @@ public class UpdatePositionHandler
         {
             return validationResult.ToErrors();
         }
-        
-        var positionId = new PositionId(Guid.NewGuid());
         var positionName = PositionName.Create(updatePositionCommand.Name).Value;
         var description = Description.Create(updatePositionCommand.Description).Value;
         
@@ -46,8 +44,13 @@ public class UpdatePositionHandler
             return GeneralErrors.AlreadyExist().ToErrors();
         }
         
-        var position = Position.Create(positionId, positionName, description);
+        var position = await _positionsRepository.GetById(updatePositionCommand.PositionId, cancellationToken);
 
+        if (position.IsFailure)
+        {
+            return position.Error.ToErrors();
+        }
+        
         position.Value.UpdateMainInformation(positionName, description);
 
         var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
@@ -57,7 +60,7 @@ public class UpdatePositionHandler
             return saveResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Position updated with id={Id}", positionId.Value);
+        _logger.LogInformation("Position updated with id={Id}", position.Value.Id.Value);
 
         return position.Value.Id.Value;
     }

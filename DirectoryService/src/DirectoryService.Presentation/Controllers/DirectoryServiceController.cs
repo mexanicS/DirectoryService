@@ -97,8 +97,20 @@ public class DirectoryServiceController : ControllerBase
         return await handler.Handle(request, cancellationToken);
     }
     
-    [HttpPost("/api/positions/{id}")]
+    [HttpPatch("/api/positions/{positionId:guid}")]
     public async Task<EndpointResult<Guid>> UpdatePosition(
+        [FromServices] UpdatePositionHandler handler,
+        [FromBody] UpdatePositionRequest request, 
+        [FromRoute]Guid positionId, 
+        CancellationToken cancellationToken = default)
+    {
+        var command = new UpdatePositionCommand(positionId, request.Name, request.Description);
+        
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpPost("/api/positions/{id}")]
+    public async Task<EndpointResult<Guid>> DeletePosition(
         [FromServices] UpdatePositionHandler handler,
         [FromBody] UpdatePositionRequest request, 
         [FromRoute]Guid positionId, 

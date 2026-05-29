@@ -11,4 +11,8 @@ public interface IPositionsRepository
     
     Task<Result<bool, Error>> IsActivePositionByName(PositionName positionName, 
         CancellationToken cancellationToken);
+
+    Task<Result<Position, Error>> GetById(Guid positionId, 
+        CancellationToken cancellationToken);
+    
 }
