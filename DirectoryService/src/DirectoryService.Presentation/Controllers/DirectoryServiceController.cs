@@ -1,4 +1,5 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
@@ -97,6 +98,17 @@ public class DirectoryServiceController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var command = new UpdateDepartmentCommand(departmentId, request.Name, request.Identifier);
+        
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpDelete("/api/departments/{departmentId:guid}")]
+    public async Task<EndpointResult<Guid>> DeleteDepartment(
+        [FromServices] DeleteDepartmentHandler handler,
+        [FromRoute] Guid departmentId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new DeleteDepartmentCommand(departmentId);
         
         return await handler.Handle(command, cancellationToken);
     }

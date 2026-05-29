@@ -164,4 +164,46 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         return await _context.DepartmentLocations.AnyAsync(
             dl => dl.DepartmentId == departmentId && dl.LocationId == locationId, cancellationToken);
     }
+
+    public void Delete(Department department)
+    {
+        _context.Departments.Remove(department);
+    }
+    
+    public async Task<Result<(Department Target, List<Department> Children), Error>> GetDepartmentWithChildren(
+        DepartmentId departmentId, 
+        CancellationToken cancellationToken)
+    {
+        // 1. Загружаем целевой отдел
+        var targetDepartment = await _context.Departments
+            .FirstOrDefaultAsync(d => d.Id == departmentId, cancellationToken);
+
+        if (targetDepartment is null)
+        {
+            return GeneralErrors.NotFound(departmentId.Value, nameof(Department));
+        }
+
+        // 2. Рекурсивно загружаем все дочерние элементы в память контекста EF
+        // Мы просто обходим дерево вниз. EF Core автоматически начнет отслеживать (track) их все!
+        var children = new List<Department>();
+        await LoadChildrenRecursive(targetDepartment, children, cancellationToken);
+
+        return (targetDepartment, children);
+    }
+    
+    private async Task LoadChildrenRecursive(
+        Department parent, 
+        List<Department> allChildren, 
+        CancellationToken cancellationToken)
+    {
+        await _context.Entry(parent)
+            .Collection(d => d.DepartmentsChildren)
+            .LoadAsync(cancellationToken);
+
+        foreach (var child in parent.DepartmentsChildren)
+        {
+            allChildren.Add(child);
+            await LoadChildrenRecursive(child, allChildren, cancellationToken);
+        }
+    }
 }

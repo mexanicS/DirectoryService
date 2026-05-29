@@ -36,11 +36,19 @@ public class DeleteLocationHandler
         }
         
         var locationId = new LocationId(deleteLocationCommand.LocationId);
-        
-        var deleteResult = await _locationsRepository.Delete(locationId,cancellationToken);
-        if (deleteResult.IsFailure)
+
+        var locationResult = await _locationsRepository.GetById(locationId, cancellationToken);
+        if (locationResult.IsFailure)
         {
-            return deleteResult.Error.ToErrors();
+            return locationResult.Error.ToErrors();
+        }
+
+        _locationsRepository.Delete(locationResult.Value);
+
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+        {
+            return saveResult.Error.ToErrors();
         }
         
         _logger.LogInformation("Deleted location with id {locationId}", locationId.Value);

@@ -15,6 +15,5 @@ public interface IPositionsRepository
     Task<Result<Position, Error>> GetById(Guid positionId, 
         CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> Delete(PositionId positionId, 
-        CancellationToken cancellationToken);
+    void Delete(Position position);
 }

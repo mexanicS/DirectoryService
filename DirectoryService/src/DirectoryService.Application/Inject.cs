@@ -1,4 +1,5 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
@@ -28,6 +29,7 @@ public static class Inject
         
         services.AddScoped<CreateDepartmentHandler>();
         services.AddScoped<UpdateDepartmentHandler>();
+        services.AddScoped<DeleteDepartmentHandler>();
         
         services.AddScoped<CreatePositionHandler>();
         services.AddScoped<UpdatePositionHandler>();

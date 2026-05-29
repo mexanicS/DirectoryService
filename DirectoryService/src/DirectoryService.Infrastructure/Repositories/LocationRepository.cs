@@ -109,17 +109,8 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
         return Error.NotFound("location.id", $"Found {actualCount}/{expectedCount} locations");
     }
     
-    public async Task<Result<Guid, Error>> Delete(LocationId locationId, CancellationToken cancellationToken)
+    public void Delete(Location location)
     {
-        var affectedRows = await _context.Locations
-            .Where(p => p.Id == locationId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        if (affectedRows == 0)
-        {
-            return GeneralErrors.NotFound(locationId.Value, nameof(Location));
-        }
-
-        return locationId.Value;
+        _context.Locations.Remove(location);
     }
 }

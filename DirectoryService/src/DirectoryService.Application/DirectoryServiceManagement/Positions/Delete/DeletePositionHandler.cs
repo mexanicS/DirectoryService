@@ -37,11 +37,19 @@ public class DeletePositionHandler
         }
         
         var positionId = new PositionId(deletePositionCommand.PositionId);
-        
-        var deleteResult = await _positionsRepository.Delete(positionId, cancellationToken);
-        if (deleteResult.IsFailure)
+
+        var positionResult = await _positionsRepository.GetById(positionId, cancellationToken);
+        if (positionResult.IsFailure)
         {
-            return deleteResult.Error.ToErrors();
+            return positionResult.Error.ToErrors();
+        }
+
+        _positionsRepository.Delete(positionResult.Value);
+
+        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveResult.IsFailure)
+        {
+            return saveResult.Error.ToErrors();
         }
         
         _logger.LogInformation("Position deleted with id={Id}", positionId.Value);

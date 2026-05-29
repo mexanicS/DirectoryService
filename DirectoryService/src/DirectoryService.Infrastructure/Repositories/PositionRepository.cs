@@ -60,17 +60,8 @@ public class PositionRepository : BaseRepository<Position>, IPositionsRepository
         return position;
     }
 
-    public async Task<Result<Guid, Error>> Delete(PositionId positionId, CancellationToken cancellationToken)
+    public void Delete(Position position)
     {
-        var affectedRows = await _context.Positions
-            .Where(p => p.Id == positionId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        if (affectedRows == 0)
-        {
-            return GeneralErrors.NotFound(positionId.Value, nameof(Position));
-        }
-
-        return positionId.Value;
+        _context.Positions.Remove(position);
     }
 }
