@@ -38,7 +38,11 @@ public class UpdatePositionHandler
         var positionName = PositionName.Create(updatePositionCommand.Name).Value;
         var description = Description.Create(updatePositionCommand.Description).Value;
         
-        var activePositionByName = await _positionsRepository.IsActivePositionByName(positionName, cancellationToken);
+        var activePositionByName = await _positionsRepository.IsActivePositionByName(
+            positionName, 
+            cancellationToken,
+            updatePositionCommand.PositionId);
+        
         if (activePositionByName.Value)
         {
             return GeneralErrors.AlreadyExist().ToErrors();

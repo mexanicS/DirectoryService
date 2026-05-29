@@ -8,9 +8,11 @@ public interface IPositionsRepository
 {
     Task<Result<Guid, Errors>> Add(Position position,
         CancellationToken cancellationToken);
-    
-    Task<Result<bool, Error>> IsActivePositionByName(PositionName positionName, 
-        CancellationToken cancellationToken);
+
+    Task<Result<bool, Error>> IsActivePositionByName(
+        PositionName positionName,
+        CancellationToken cancellationToken,
+        Guid? excludePositionId = null);
 
     Task<Result<Position, Error>> GetById(Guid positionId, 
         CancellationToken cancellationToken);
