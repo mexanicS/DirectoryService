@@ -7,6 +7,7 @@ using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Positions.Update;
 using DirectoryService.Presentation.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -95,6 +96,19 @@ public class DirectoryServiceController : ControllerBase
     {
         return await handler.Handle(request, cancellationToken);
     }
+    
+    [HttpPost("/api/positions/{id}")]
+    public async Task<EndpointResult<Guid>> UpdatePosition(
+        [FromServices] UpdatePositionHandler handler,
+        [FromBody] UpdatePositionRequest request, 
+        [FromRoute]Guid positionId, 
+        CancellationToken cancellationToken = default)
+    {
+        var command = new UpdatePositionCommand(positionId, request.Name, request.Description);
+        
+        return await handler.Handle(command, cancellationToken);
+    }
+
     
     [HttpPut("/api/departments/{departmentId:guid}/locations")]
     public async Task<EndpointResult<Guid>> UpdateLocations(
