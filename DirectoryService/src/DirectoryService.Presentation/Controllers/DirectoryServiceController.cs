@@ -5,6 +5,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Delete;
@@ -41,6 +42,17 @@ public class DirectoryServiceController : ControllerBase
     {
         var command = new UpdateLocationCommand(locationId, request.LocationName, request.Address, request.Timezone); 
         
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpDelete("/api/locations/{locationId:guid}")]
+    public async Task<EndpointResult<Guid>> DeleteLocation(
+        [FromServices] DeleteLocationHandler handler,
+        [FromRoute] Guid locationId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new DeleteLocationCommand(locationId); 
+    
         return await handler.Handle(command, cancellationToken);
     }
     
