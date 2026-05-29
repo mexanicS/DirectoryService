@@ -1,6 +1,8 @@
+using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
@@ -71,6 +73,30 @@ public class DepartmentController : ControllerBase
     {
         var command = new DeleteDepartmentCommand(departmentId);
         
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpPost("/api/departments/{departmentId:guid}/positions/{positionId:guid}")]
+    public async Task<EndpointResult<Guid>> AddPositionToDepartment(
+        [FromServices] AddPositionToDepartmentHandler handler,
+        [FromRoute] Guid departmentId,
+        [FromRoute] Guid positionId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new AddPositionToDepartmentCommand(departmentId, positionId);
+    
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpDelete("/api/departments/{departmentId:guid}/positions/{positionId:guid}")]
+    public async Task<EndpointResult<Guid>> RemovePositionFromDepartment(
+        [FromServices] RemovePositionFromDepartmentHandler handler,
+        [FromRoute] Guid departmentId,
+        [FromRoute] Guid positionId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new RemovePositionFromDepartmentCommand(departmentId, positionId);
+    
         return await handler.Handle(command, cancellationToken);
     }
 }

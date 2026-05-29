@@ -32,8 +32,7 @@ public class DeleteDepartmentHandler
             DeleteDepartmentCommand deleteDepartmentCommand,
             CancellationToken cancellationToken)
         {
-            ValidationResult? validationResult =
-                await _validator.ValidateAsync(deleteDepartmentCommand, cancellationToken);
+            var validationResult = await _validator.ValidateAsync(deleteDepartmentCommand, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return validationResult.ToErrors();
@@ -41,7 +40,6 @@ public class DeleteDepartmentHandler
 
             DepartmentId departmentId = new(deleteDepartmentCommand.DepartmentId);
 
-            // 1. Открываем транзакцию
             var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
@@ -52,7 +50,6 @@ public class DeleteDepartmentHandler
 
             try
             {
-                // 2. Получаем отдел и список его детей (рекурсивно загруженных через навигацию)
                 var dataResult =
                     await _departmentsRepository.GetDepartmentWithChildren(departmentId, cancellationToken);
                 if (dataResult.IsFailure)
@@ -63,27 +60,21 @@ public class DeleteDepartmentHandler
 
                 var (targetDepartment, children) = dataResult.Value;
 
-                // 3. Делегируем расчет путей домену
                 var oldPathPrefix = targetDepartment.Path.Value;
                 var newPathPrefix = targetDepartment.GetParentPathValue();
 
-                // 4. Пересчитываем иерархию для всех дочерних элементов
                 foreach (var child in children)
                 {
-                    // Если это прямой потомок — перепривязываем к "дедушке"
                     if (child.ParentId == targetDepartment.Id)
                     {
                         child.UpdateParent(targetDepartment.ParentId);
                     }
 
-                    // Сдвигаем узел вверх по дереву внутри домена
                     child.MoveUpInHierarchy(oldPathPrefix, newPathPrefix, targetDepartment.ParentId);
                 }
 
-                // 5. Удаляем сам выбранный отдел
                 _departmentsRepository.Delete(targetDepartment);
 
-                // 6. Сохраняем изменения (EF Core сгенерирует UPDATE для детей и DELETE для родителя)
                 var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
                 if (saveResult.IsFailure)
                 {
@@ -91,7 +82,6 @@ public class DeleteDepartmentHandler
                     return saveResult.Error.ToErrors();
                 }
 
-                // 7. Коммитим транзакцию
                 var commitResult = transactionScope.Commit();
                 if (commitResult.IsFailure)
                 {
@@ -108,8 +98,10 @@ public class DeleteDepartmentHandler
             {
                 _logger.LogError(ex, "Error during shifting up hierarchy for department id={Id}",
                     deleteDepartmentCommand.DepartmentId);
+                
                 transactionScope.Rollback();
-                throw;
+                
+                return GeneralErrors.Failure(ex.Message).ToErrors();
             }
         }
 }

@@ -1,6 +1,8 @@
+using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
@@ -36,6 +38,9 @@ public static class Inject
         services.AddScoped<DeletePositionHandler>();
         
         services.AddScoped<UpdateLocationsByDepartmentHandler>();
+        
+        services.AddScoped<AddPositionToDepartmentHandler>();
+        services.AddScoped<RemovePositionFromDepartmentHandler>();
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         

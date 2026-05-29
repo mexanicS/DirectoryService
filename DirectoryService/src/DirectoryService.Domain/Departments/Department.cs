@@ -187,4 +187,19 @@ public sealed class Department
          var lastDotIndex = Path.Value.LastIndexOf('/');
          return lastDotIndex == -1 ? string.Empty : Path.Value.Substring(0, lastDotIndex);
      }
+     
+     public UnitResult<Error> RemovePosition(Guid positionId)
+     {
+         var departmentPosition = _departmentPositions
+             .FirstOrDefault(x => x.PositionId.Value == positionId);
+
+         if (departmentPosition is null)
+         {
+             return GeneralErrors.NotFound(positionId, nameof(DepartmentPosition));
+         }
+
+         _departmentPositions.Remove(departmentPosition);
+
+         return Result.Success<Error>();
+     }
 }
