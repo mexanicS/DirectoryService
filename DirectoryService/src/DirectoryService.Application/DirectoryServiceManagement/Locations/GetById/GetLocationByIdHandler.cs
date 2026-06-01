@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DataBase;
 using DirectoryService.Contract;
+using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
@@ -35,7 +36,7 @@ public class GetLocationByIdHandler
             .FirstOrDefaultAsync(cancellationToken);
 
         if (response is null)
-            return GeneralErrors.NotFound(query.Id, "Location");
+            return GeneralErrors.NotFound(query.Id, nameof(Location));
 
         return response;
     }

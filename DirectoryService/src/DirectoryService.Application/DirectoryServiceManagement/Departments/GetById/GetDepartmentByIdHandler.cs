@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.DataBase;
 using DirectoryService.Contract;
+using DirectoryService.Domain.Departments;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
@@ -27,14 +28,14 @@ public class GetDepartmentByIdHandler
                 d.Identifier.Value,
                 d.Path.Value,
                 d.Depth.Value,
-                d.ParentId != null ? d.ParentId.Value : (Guid?)null,
+                d.ParentId != null ? d.ParentId.Value : null,
                 d.IsActive,
                 d.CreatedAt,
                 d.UpdatedAt))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (response is null)
-            return GeneralErrors.NotFound(query.Id, "Department");
+            return GeneralErrors.NotFound(query.Id, nameof(Department));
 
         return response;
     }
