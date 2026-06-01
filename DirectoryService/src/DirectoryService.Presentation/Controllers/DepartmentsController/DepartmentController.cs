@@ -1,11 +1,13 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
+using DirectoryService.Contract;
 using DirectoryService.Presentation.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,16 @@ public class DepartmentController : ControllerBase
     {
     }
     
+    [HttpGet("/api/departments/{departmentId:guid}")]
+    public async Task<EndpointResult<DepartmentResponse>> GetDepartment(
+        [FromServices] GetDepartmentByIdHandler handler,
+        [FromRoute] Guid departmentId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetDepartmentByIdQuery(departmentId);
+        return await handler.Handle(query, cancellationToken);
+    }
+
     [HttpPost("/api/departments/{departmentId:guid}/locations/{locationId:guid}")]
     public async Task<EndpointResult<Guid>> LinkDepartmentAndLocation(
         [FromServices] LinkDepartmentAndLocationHandler handler,

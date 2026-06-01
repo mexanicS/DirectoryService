@@ -1,3 +1,4 @@
+
 using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
@@ -28,6 +29,8 @@ public static class Inject
     {
         services.AddScoped<DirectoryServiceDbContext>(_ => 
             new DirectoryServiceDbContext(configuration.GetConnectionString("Database")!));
+
+        services.AddScoped<IReadDbContext, ReadDbContext>();
         
         return services;
     }
