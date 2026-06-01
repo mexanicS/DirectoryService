@@ -1,6 +1,7 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
@@ -8,6 +9,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Delete;
@@ -38,6 +40,9 @@ public static class Inject
         services.AddScoped<DeletePositionHandler>();
         
         services.AddScoped<UpdateLocationsByDepartmentHandler>();
+        
+        services.AddScoped<GetLocationByIdHandler>();
+        services.AddScoped<GetDepartmentByIdHandler>();
         
         services.AddScoped<AddPositionToDepartmentHandler>();
         services.AddScoped<RemovePositionFromDepartmentHandler>();

@@ -2,7 +2,9 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
+using DirectoryService.Contract;
 using DirectoryService.Presentation.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,16 @@ public class LocationController : ControllerBase
 {
     public LocationController()
     {
+    }
+
+    [HttpGet("/api/locations/{locationId:guid}")]
+    public async Task<EndpointResult<LocationResponse>> GetLocation(
+        [FromServices] GetLocationByIdHandler handler,
+        [FromRoute] Guid locationId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetLocationByIdQuery(locationId);
+        return await handler.Handle(query, cancellationToken);
     }
 
     [HttpPost("/api/locations")]
