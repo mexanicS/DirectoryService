@@ -3,7 +3,6 @@ using DirectoryService.Application.DataBase;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 

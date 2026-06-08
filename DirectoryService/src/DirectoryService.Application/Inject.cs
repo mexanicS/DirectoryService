@@ -10,6 +10,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.GetTop;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Delete;
@@ -46,6 +47,8 @@ public static class Inject
         
         services.AddScoped<AddPositionToDepartmentHandler>();
         services.AddScoped<RemovePositionFromDepartmentHandler>();
+
+        services.AddScoped<GetTopLocationByIdHandler>();
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         
