@@ -31,8 +31,8 @@ public class LocationController : ControllerBase
     }
     
     [HttpGet("/api/locations/top")]
-    public async Task<EndpointResult<IReadOnlyList<TopLocationResponse>>> GetTopLocation(
-        [FromServices] GetTopLocationByIdHandler handler,
+    public async Task<EndpointResult<IReadOnlyList<TopLocationResponse>>> GetTopLocationByCountDepartments(
+        [FromServices] GetTopLocationByCountDepartmentsHandler handler,
         CancellationToken cancellationToken = default)
     {
         return await handler.Handle(cancellationToken);

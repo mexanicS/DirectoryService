@@ -48,7 +48,7 @@ public static class Inject
         services.AddScoped<AddPositionToDepartmentHandler>();
         services.AddScoped<RemovePositionFromDepartmentHandler>();
 
-        services.AddScoped<GetTopLocationByIdHandler>();
+        services.AddScoped<GetTopLocationByCountDepartmentsHandler>();
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         

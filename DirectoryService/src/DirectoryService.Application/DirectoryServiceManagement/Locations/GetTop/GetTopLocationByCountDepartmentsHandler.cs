@@ -6,11 +6,11 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.GetTop;
 
-public class GetTopLocationByIdHandler
+public class GetTopLocationByCountDepartmentsHandler
 {
     private readonly IReadDbContext _readDb;
 
-    public GetTopLocationByIdHandler(IReadDbContext readDb)
+    public GetTopLocationByCountDepartmentsHandler(IReadDbContext readDb)
     {
         _readDb = readDb;
     }
