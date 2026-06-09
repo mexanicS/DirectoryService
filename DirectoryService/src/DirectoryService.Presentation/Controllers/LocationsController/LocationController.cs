@@ -3,6 +3,7 @@ using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
+using DirectoryService.Application.DirectoryServiceManagement.Locations.GetTop;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Contract;
 using DirectoryService.Presentation.EndpointResults;
@@ -27,6 +28,14 @@ public class LocationController : ControllerBase
     {
         var query = new GetLocationByIdQuery(locationId);
         return await handler.Handle(query, cancellationToken);
+    }
+    
+    [HttpGet("/api/locations/top")]
+    public async Task<EndpointResult<IReadOnlyList<TopLocationResponse>>> GetTopLocationByCountDepartments(
+        [FromServices] GetTopLocationByCountDepartmentsHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        return await handler.Handle(cancellationToken);
     }
 
     [HttpPost("/api/locations")]
