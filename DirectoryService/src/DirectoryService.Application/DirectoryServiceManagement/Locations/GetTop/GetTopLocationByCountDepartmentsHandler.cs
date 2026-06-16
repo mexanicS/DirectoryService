@@ -15,7 +15,7 @@ public class GetTopLocationByCountDepartmentsHandler
         _readDb = readDb;
     }
 
-    public async Task<Result<IReadOnlyList<TopLocationResponse>, Error>> Handle(
+    public async Task<Result<TopLocationResponse, Error>> Handle(
         CancellationToken cancellationToken = default)
     {
         var topLocations = await (
@@ -23,7 +23,7 @@ public class GetTopLocationByCountDepartmentsHandler
             let departmentCount = _readDb.DepartmentLocations
                 .Count(dl => dl.LocationId == location.Id)
             orderby departmentCount descending
-            select new TopLocationResponse(
+            select new LocationDto(
                 location.Id.Value,
                 location.Name.Value,
                 location.Address.City,
@@ -33,6 +33,6 @@ public class GetTopLocationByCountDepartmentsHandler
                 departmentCount)
         ).Take(5).ToListAsync(cancellationToken);
         
-        return topLocations;
+        return new TopLocationResponse(topLocations);
     }
 } 

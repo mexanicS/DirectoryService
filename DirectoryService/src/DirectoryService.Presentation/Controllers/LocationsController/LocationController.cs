@@ -31,7 +31,7 @@ public class LocationController : ControllerBase
     }
     
     [HttpGet("/api/locations/top")]
-    public async Task<EndpointResult<IReadOnlyList<TopLocationResponse>>> GetTopLocationByCountDepartments(
+    public async Task<EndpointResult<TopLocationResponse>> GetTopLocationByCountDepartments(
         [FromServices] GetTopLocationByCountDepartmentsHandler handler,
         CancellationToken cancellationToken = default)
     {
