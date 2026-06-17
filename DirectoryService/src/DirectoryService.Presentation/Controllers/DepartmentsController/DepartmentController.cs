@@ -114,7 +114,7 @@ public class DepartmentController : ControllerBase
     }
     
     [HttpGet("/api/departments")]
-    public async Task<EndpointResult<GetDepartmentsDto>> GetDepartments(
+    public async Task<EndpointResult<PagedResult<DepartmentResponse>>> GetDepartments(
         [FromServices] GetDepartmentsHandler handler,
         [FromQuery] GetDepartmentsQuery query, 
         CancellationToken cancellationToken = default)
