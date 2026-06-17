@@ -1,6 +1,7 @@
 using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Get;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
@@ -110,5 +111,14 @@ public class DepartmentController : ControllerBase
         var command = new RemovePositionFromDepartmentCommand(departmentId, positionId);
     
         return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpGet("/api/departments")]
+    public async Task<EndpointResult<PagedResult<DepartmentResponse>>> GetDepartments(
+        [FromServices] GetDepartmentsHandler handler,
+        [FromQuery] GetDepartmentsQuery query, 
+        CancellationToken cancellationToken = default)
+    {
+        return await handler.Handle(query, cancellationToken);
     }
 }
