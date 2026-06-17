@@ -32,12 +32,9 @@ public class GetDepartmentsHandler
 
         query = ApplySorting(query, request.SortBy, request.SortDir);
         
-        var page = request.Pagination.Page;
-        var pageSize = request.Pagination.PageSize;
-
         var items = await query
-            .Skip((request.Pagination.Page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((request.Pagination.Page - 1) * request.Pagination.PageSize)
+            .Take(request.Pagination.PageSize)
             .Select(d => new DepartmentResponse(
                     d.Id.Value,
                     d.Name.Value,
@@ -50,7 +47,7 @@ public class GetDepartmentsHandler
                     d.UpdatedAt))
             .ToListAsync(cancellationToken);
 
-        var result = new PagedResult<DepartmentResponse>(items, totalCount, page, pageSize);
+        var result = new PagedResult<DepartmentResponse>(items, totalCount, request.Pagination.Page, request.Pagination.PageSize);
         return Result.Success<PagedResult<DepartmentResponse>, Error>(result);
     }
     
