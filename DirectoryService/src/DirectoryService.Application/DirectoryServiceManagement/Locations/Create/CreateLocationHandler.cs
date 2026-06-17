@@ -8,25 +8,15 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 
-public class CreateLocationHandler
+public class CreateLocationHandler(
+    ILocationsRepository locationsRepository,
+    ILogger<CreateLocationHandler> logger,
+    IValidator<CreateLocationDto> validator)
 {
-    private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<CreateLocationHandler> _logger;
-    private readonly IValidator<CreateLocationDto> _validator;
-
-    public CreateLocationHandler(ILocationsRepository locationsRepository,
-        ILogger<CreateLocationHandler> logger,
-        IValidator<CreateLocationDto> validator)
-    {
-        _locationsRepository = locationsRepository;
-        _logger = logger;
-        _validator = validator;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(CreateLocationDto createLocationDto, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(createLocationDto, cancellationToken);
+        var validationResult = await validator.ValidateAsync(createLocationDto, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -34,20 +24,20 @@ public class CreateLocationHandler
         
         var locationCreateResult = CreateLocation(createLocationDto);
         
-        var existsByAddress = await _locationsRepository
+        var existsByAddress = await locationsRepository
             .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
         
         if (existsByAddress.Value)
             return GeneralErrors.AlreadyExistByAddress().ToErrors();
 
-        var addAsync = await _locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
+        var addAsync = await locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         
         if (addAsync.IsFailure)
         {
             return new Errors([addAsync.Error]);
         }
         
-        _logger.LogInformation("Created location added with id {locationId}", locationCreateResult.Value.Id.Value);
+        logger.LogInformation("Created location added with id {locationId}", locationCreateResult.Value.Id.Value);
         
         return locationCreateResult.Value.Id.Value;
     }

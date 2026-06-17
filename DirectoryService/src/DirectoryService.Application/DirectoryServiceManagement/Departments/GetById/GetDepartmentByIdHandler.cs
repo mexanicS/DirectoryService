@@ -7,20 +7,13 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 
-public class GetDepartmentByIdHandler
+public class GetDepartmentByIdHandler(IReadDbContext readDb)
 {
-    private readonly IReadDbContext _readDb;
-
-    public GetDepartmentByIdHandler(IReadDbContext readDb)
-    {
-        _readDb = readDb;
-    }
-
     public async Task<Result<DepartmentResponse, Error>> Handle(
         GetDepartmentByIdQuery query,
         CancellationToken cancellationToken = default)
     {
-        var response = await _readDb.Departments
+        var response = await readDb.Departments
             .Where(d => d.Id == query.Id && d.IsActive)
             .Select(d => new DepartmentResponse(
                 d.Id.Value,

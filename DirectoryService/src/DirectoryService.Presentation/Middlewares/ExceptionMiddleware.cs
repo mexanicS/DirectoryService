@@ -2,29 +2,21 @@ using SharedKernel;
 
 namespace DirectoryService.Presentation.Middlewares;
 
-public class ExceptionMiddleware
+public class ExceptionMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionMiddleware> _logger;
-
-    public ExceptionMiddleware(RequestDelegate next,
-        ILogger<ExceptionMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (Exception ex)
         {
             var correlationId = Guid.NewGuid();
             
-            _logger.LogError(ex, "Unhandled exception occurred. CorrelationId: {CorrelationId}, RequestPath: {RequestPath}, Method: {Method}", 
+            logger.LogError(ex, "Unhandled exception occurred. CorrelationId: {CorrelationId}, RequestPath: {RequestPath}, Method: {Method}", 
                 correlationId, context.Request.Path, context.Request.Method);
             
             var responseError = Error.Failure("server.internal",ex.Message);

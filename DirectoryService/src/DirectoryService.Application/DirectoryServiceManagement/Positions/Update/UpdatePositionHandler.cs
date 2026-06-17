@@ -8,29 +8,17 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Positions.Update;
 
-public class UpdatePositionHandler
+public class UpdatePositionHandler(
+    IPositionsRepository positionsRepository,
+    ILogger<UpdatePositionHandler> logger,
+    IValidator<UpdatePositionCommand> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly IPositionsRepository _positionsRepository;
-    private readonly ILogger<UpdatePositionHandler> _logger;
-    private readonly IValidator<UpdatePositionCommand> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public UpdatePositionHandler(IPositionsRepository positionsRepository,
-        ILogger<UpdatePositionHandler> logger,
-        IValidator<UpdatePositionCommand> validator,
-        ITransactionManager transactionManager)
-    {
-        _positionsRepository = positionsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(
         UpdatePositionCommand updatePositionCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updatePositionCommand, cancellationToken);
+        var validationResult = await validator.ValidateAsync(updatePositionCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -38,7 +26,7 @@ public class UpdatePositionHandler
         var positionName = PositionName.Create(updatePositionCommand.Name).Value;
         var description = Description.Create(updatePositionCommand.Description).Value;
         
-        var activePositionByName = await _positionsRepository.IsActivePositionByName(
+        var activePositionByName = await positionsRepository.IsActivePositionByName(
             positionName, 
             cancellationToken,
             updatePositionCommand.PositionId);
@@ -48,7 +36,7 @@ public class UpdatePositionHandler
             return GeneralErrors.AlreadyExist().ToErrors();
         }
         
-        var position = await _positionsRepository.GetById(updatePositionCommand.PositionId, cancellationToken);
+        var position = await positionsRepository.GetById(updatePositionCommand.PositionId, cancellationToken);
 
         if (position.IsFailure)
         {
@@ -57,14 +45,14 @@ public class UpdatePositionHandler
         
         position.Value.UpdateMainInformation(positionName, description);
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
             return saveResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Position updated with id={Id}", position.Value.Id.Value);
+        logger.LogInformation("Position updated with id={Id}", position.Value.Id.Value);
 
         return position.Value.Id.Value;
     }

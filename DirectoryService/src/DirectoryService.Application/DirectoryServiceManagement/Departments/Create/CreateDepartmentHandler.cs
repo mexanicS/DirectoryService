@@ -11,29 +11,17 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 
-public class CreateDepartmentHandler
+public class CreateDepartmentHandler(
+    IDepartmentsRepository departmentsRepository,
+    ILocationsRepository locationsRepository,
+    ILogger<CreateDepartmentHandler> logger,
+    IValidator<CreateDepartmentDto> validator)
 {
-    private readonly IDepartmentsRepository _departmentsRepository;
-    private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<CreateDepartmentHandler> _logger;
-    private readonly IValidator<CreateDepartmentDto> _validator;
-
-    public CreateDepartmentHandler(IDepartmentsRepository departmentsRepository,
-        ILocationsRepository locationsRepository,
-        ILogger<CreateDepartmentHandler> logger,
-        IValidator<CreateDepartmentDto> validator)
-    {
-        _departmentsRepository = departmentsRepository;
-        _locationsRepository = locationsRepository;
-        _logger = logger;
-        _validator = validator;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(
         CreateDepartmentDto createDepartmentDto,
         CancellationToken cancellationToken)
     {   
-        var validationResult = await _validator.ValidateAsync(createDepartmentDto, cancellationToken);
+        var validationResult = await validator.ValidateAsync(createDepartmentDto, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -45,7 +33,7 @@ public class CreateDepartmentHandler
         
         var locationIds = createDepartmentDto.LocationIds.ToList();
         
-        var locationExists = await _locationsRepository.ExistsActiveLocationsById(locationIds, cancellationToken);
+        var locationExists = await locationsRepository.ExistsActiveLocationsById(locationIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();
@@ -65,18 +53,18 @@ public class CreateDepartmentHandler
             if (departmentResult.IsFailure)
                 return departmentResult.Error.ToErrors();
 
-            var saveResult = await _departmentsRepository.Add(departmentResult.Value, cancellationToken);
+            var saveResult = await departmentsRepository.Add(departmentResult.Value, cancellationToken);
 
             if (saveResult.IsFailure)
                 return saveResult.Error;
 
-            _logger.LogInformation("Department created with id={Id}", departmentId.Value);
+            logger.LogInformation("Department created with id={Id}", departmentId.Value);
 
             return departmentResult.Value.Id.Value;
         }
         else
         {
-            var parentQuery = await _departmentsRepository.GetById((Guid)createDepartmentDto.ParentId, cancellationToken);
+            var parentQuery = await departmentsRepository.GetById((Guid)createDepartmentDto.ParentId, cancellationToken);
 
             if (parentQuery.IsFailure)
                 return parentQuery.Error.ToErrors();
@@ -93,14 +81,14 @@ public class CreateDepartmentHandler
                 return departmentResult.Error.ToErrors();
             }
 
-            var saveResult = await _departmentsRepository.Add(departmentResult.Value, cancellationToken);
+            var saveResult = await departmentsRepository.Add(departmentResult.Value, cancellationToken);
 
             if (saveResult.IsFailure)
             {
                 return saveResult.Error;
             }
             
-            _logger.LogInformation("Child department created with id={Id}", departmentId.Value);
+            logger.LogInformation("Child department created with id={Id}", departmentId.Value);
 
             return departmentResult.Value.Id.Value;
         }

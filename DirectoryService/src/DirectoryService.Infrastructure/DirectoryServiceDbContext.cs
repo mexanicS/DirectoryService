@@ -8,15 +8,8 @@ using Microsoft.Extensions.Logging;
 
 namespace DirectoryService.Infrastructure;
 
-public class DirectoryServiceDbContext : DbContext
+public class DirectoryServiceDbContext(string connectionString) : DbContext
 {
-    private readonly string _connectionString;
-    
-    public DirectoryServiceDbContext(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
-    
     public DbSet<Department> Departments { get; set; }
     public DbSet<DepartmentLocation> DepartmentLocations { get; set; }
     public DbSet<DepartmentPosition> DepartmentPositions { get; set; }
@@ -25,7 +18,7 @@ public class DirectoryServiceDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_connectionString);
+        optionsBuilder.UseNpgsql(connectionString);
         optionsBuilder.UseLoggerFactory(CreateLoggerFactory());
         optionsBuilder.EnableSensitiveDataLogging();
             

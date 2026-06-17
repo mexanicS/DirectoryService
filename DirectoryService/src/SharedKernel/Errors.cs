@@ -2,14 +2,9 @@
 
 namespace SharedKernel;
 
-public class Errors : IEnumerable<Error>
+public class Errors(IEnumerable<Error> errors) : IEnumerable<Error>
 {
-    private readonly List<Error> _errors;
-
-    public Errors(IEnumerable<Error> errors)
-    {
-        _errors = [..errors];
-    }
+    private readonly List<Error> _errors = [..errors];
 
     public static implicit operator Errors(List<Error> errors) => new(errors);
 

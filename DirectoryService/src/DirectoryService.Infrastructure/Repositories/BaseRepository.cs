@@ -4,28 +4,19 @@ using Microsoft.Extensions.Logging;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
-public abstract class BaseRepository<T> 
+public abstract class BaseRepository<T>(DirectoryServiceDbContext context, ILogger logger)
     where T : class
 {
-    private readonly DirectoryServiceDbContext _context;
-    private readonly ILogger _logger;
-
-    protected BaseRepository(DirectoryServiceDbContext context, ILogger logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-
     protected async Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "An error when trying to save changes in the database");
+            logger.LogCritical(ex, "An error when trying to save changes in the database");
             return Result.Failure($"Database error: {ex.Message}");
         }
     }

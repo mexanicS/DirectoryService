@@ -8,22 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DirectoryService.Infrastructure.DataBase;
 
-public class ReadDbContext : IReadDbContext
+public class ReadDbContext(DirectoryServiceDbContext context) : IReadDbContext
 {
-    private readonly DirectoryServiceDbContext _context;
+    public IQueryable<Department> Departments => context.Departments.AsNoTracking();
 
-    public ReadDbContext(DirectoryServiceDbContext context)
-    {
-        _context = context;
-    }
+    public IQueryable<Location> Locations => context.Locations.AsNoTracking();
 
-    public IQueryable<Department> Departments => _context.Departments.AsNoTracking();
-
-    public IQueryable<Location> Locations => _context.Locations.AsNoTracking();
-
-    public IQueryable<Position> Positions => _context.Positions.AsNoTracking();
+    public IQueryable<Position> Positions => context.Positions.AsNoTracking();
     
-    public IQueryable<DepartmentLocation> DepartmentLocations => _context.DepartmentLocations.AsNoTracking();
+    public IQueryable<DepartmentLocation> DepartmentLocations => context.DepartmentLocations.AsNoTracking();
     
-    public IQueryable<DepartmentPosition> DepartmentPositions => _context.DepartmentPositions.AsNoTracking();
+    public IQueryable<DepartmentPosition> DepartmentPositions => context.DepartmentPositions.AsNoTracking();
 }

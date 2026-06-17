@@ -8,19 +8,13 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Get;
 
-public class GetDepartmentsHandler
+public class GetDepartmentsHandler(IReadDbContext readDb)
 {
-    private readonly IReadDbContext _readDb;
-
-    public GetDepartmentsHandler(IReadDbContext readDb)
-    {
-        _readDb = readDb;
-    }
     public async Task<Result<PagedResult<DepartmentResponse>, Error>> Handle(
         GetDepartmentsQuery request,
         CancellationToken cancellationToken = default)
     {
-        var query = _readDb.Departments;
+        var query = readDb.Departments;
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

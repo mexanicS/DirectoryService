@@ -6,22 +6,14 @@ using SharedKernel;
 
 namespace DirectoryService.Infrastructure.DataBase;
 
-public class TransactionScope : ITransactionScope
+public class TransactionScope(IDbTransaction transaction, ILogger<TransactionScope> logger)
+    : ITransactionScope
 {
-    private readonly IDbTransaction _transaction;
-    private readonly ILogger<TransactionScope> _logger;
-
-    public TransactionScope(IDbTransaction transaction, ILogger<TransactionScope> logger)
-    {
-        _transaction = transaction;
-        _logger = logger;
-    }
-
     public UnitResult<Error> Commit()
     {
         try
         {
-            _transaction.Commit();
+            transaction.Commit();
 
             return UnitResult.Success<Error>();
         }
@@ -29,7 +21,7 @@ public class TransactionScope : ITransactionScope
         {
             var message = "Failed to commit transaction.";
 
-            _logger.LogError(e, message);
+            logger.LogError(e, message);
 
             return Error.Failure("transaction.commit.failure", message);
         }
@@ -39,7 +31,7 @@ public class TransactionScope : ITransactionScope
     {
         try
         {
-            _transaction.Rollback();
+            transaction.Rollback();
 
             return UnitResult.Success<Error>();
         }
@@ -47,7 +39,7 @@ public class TransactionScope : ITransactionScope
         {
             var message = "Failed to rollback transaction.";
 
-            _logger.LogError(e, message);
+            logger.LogError(e, message);
 
             return Error.Failure("transaction.rollback.failure", message);
         }
@@ -55,6 +47,6 @@ public class TransactionScope : ITransactionScope
     
     public void Dispose()
     {
-        _transaction.Dispose();
+        transaction.Dispose();
     }
 }

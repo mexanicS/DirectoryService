@@ -7,18 +7,13 @@ using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
-public class LocationsRepository : BaseRepository<Location>, ILocationsRepository
+public class LocationsRepository(
+    DirectoryServiceDbContext context,
+    ILogger<LocationsRepository> logger)
+    : BaseRepository<Location>(context, logger), ILocationsRepository
 {
-    private readonly DirectoryServiceDbContext _context;
-    private readonly ILogger<LocationsRepository> _logger;
+    private readonly DirectoryServiceDbContext _context = context;
 
-    public LocationsRepository(DirectoryServiceDbContext context,
-        ILogger<LocationsRepository> logger) : base(context, logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-    
     public async Task<Result<Guid, Error>> AddAsync(Location location, 
         CancellationToken cancellationToken = default)
     {
@@ -31,12 +26,12 @@ public class LocationsRepository : BaseRepository<Location>, ILocationsRepositor
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
-            _logger.LogWarning(ex, "Location with this name already exists");
+            logger.LogWarning(ex, "Location with this name already exists");
             return GeneralErrors.AlreadyExist();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error to add location");
+            logger.LogError(ex, "Error to add location");
             return GeneralErrors.Failure();
         }
     }

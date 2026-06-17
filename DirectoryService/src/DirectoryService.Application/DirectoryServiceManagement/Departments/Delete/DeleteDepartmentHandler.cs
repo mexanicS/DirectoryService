@@ -8,30 +8,17 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 
-public class DeleteDepartmentHandler
+public class DeleteDepartmentHandler(
+    IDepartmentsRepository departmentsRepository,
+    ILogger<DeleteDepartmentHandler> logger,
+    IValidator<DeleteDepartmentCommand> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly IDepartmentsRepository _departmentsRepository;
-    private readonly ILogger<DeleteDepartmentHandler> _logger;
-    private readonly IValidator<DeleteDepartmentCommand> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public DeleteDepartmentHandler(IDepartmentsRepository departmentsRepository,
-        ILogger<DeleteDepartmentHandler> logger,
-        IValidator<DeleteDepartmentCommand> validator,
-        ITransactionManager transactionManager)
-    {
-        _departmentsRepository = departmentsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
-    
     public async Task<Result<Guid, Errors>> Handle(
             DeleteDepartmentCommand deleteDepartmentCommand,
             CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(deleteDepartmentCommand, cancellationToken);
+            var validationResult = await validator.ValidateAsync(deleteDepartmentCommand, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return validationResult.ToErrors();
@@ -39,7 +26,7 @@ public class DeleteDepartmentHandler
 
             DepartmentId departmentId = new(deleteDepartmentCommand.DepartmentId);
 
-            var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+            var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
             if (transactionScopeResult.IsFailure)
             {
                 return transactionScopeResult.Error.ToErrors();
@@ -50,7 +37,7 @@ public class DeleteDepartmentHandler
             try
             {
                 var dataResult =
-                    await _departmentsRepository.GetDepartmentWithChildren(departmentId, cancellationToken);
+                    await departmentsRepository.GetDepartmentWithChildren(departmentId, cancellationToken);
                 if (dataResult.IsFailure)
                 {
                     transactionScope.Rollback();
@@ -72,9 +59,9 @@ public class DeleteDepartmentHandler
                     child.MoveUpInHierarchy(oldPathPrefix, newPathPrefix, targetDepartment.ParentId);
                 }
 
-                _departmentsRepository.Delete(targetDepartment);
+                departmentsRepository.Delete(targetDepartment);
 
-                var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+                var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
                 if (saveResult.IsFailure)
                 {
                     transactionScope.Rollback();
@@ -88,14 +75,14 @@ public class DeleteDepartmentHandler
                     return commitResult.Error.ToErrors();
                 }
 
-                _logger.LogInformation("Department id={Id} deleted. Children shifted up successfully",
+                logger.LogInformation("Department id={Id} deleted. Children shifted up successfully",
                     deleteDepartmentCommand.DepartmentId);
 
                 return departmentId.Value;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during shifting up hierarchy for department id={Id}",
+                logger.LogError(ex, "Error during shifting up hierarchy for department id={Id}",
                     deleteDepartmentCommand.DepartmentId);
                 
                 transactionScope.Rollback();

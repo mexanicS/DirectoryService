@@ -6,21 +6,14 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.GetTop;
 
-public class GetTopLocationByCountDepartmentsHandler
+public class GetTopLocationByCountDepartmentsHandler(IReadDbContext readDb)
 {
-    private readonly IReadDbContext _readDb;
-
-    public GetTopLocationByCountDepartmentsHandler(IReadDbContext readDb)
-    {
-        _readDb = readDb;
-    }
-
     public async Task<Result<TopLocationResponse, Error>> Handle(
         CancellationToken cancellationToken = default)
     {
         var topLocations = await (
-            from location in _readDb.Locations
-            let departmentCount = _readDb.DepartmentLocations
+            from location in readDb.Locations
+            let departmentCount = readDb.DepartmentLocations
                 .Count(dl => dl.LocationId == location.Id)
             orderby departmentCount descending
             select new LocationDto(

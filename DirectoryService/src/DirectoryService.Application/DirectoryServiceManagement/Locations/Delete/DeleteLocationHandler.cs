@@ -8,28 +8,16 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
 
-public class DeleteLocationHandler
+public class DeleteLocationHandler(
+    ILocationsRepository locationsRepository,
+    ILogger<DeleteLocationHandler> logger,
+    IValidator<DeleteLocationCommand> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<DeleteLocationHandler> _logger;
-    private readonly IValidator<DeleteLocationCommand> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public DeleteLocationHandler(ILocationsRepository locationsRepository,
-        ILogger<DeleteLocationHandler> logger,
-        IValidator<DeleteLocationCommand> validator,
-        ITransactionManager transactionManager)
-    {
-        _locationsRepository = locationsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(DeleteLocationCommand deleteLocationCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(deleteLocationCommand, cancellationToken);
+        var validationResult = await validator.ValidateAsync(deleteLocationCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -37,21 +25,21 @@ public class DeleteLocationHandler
         
         var locationId = new LocationId(deleteLocationCommand.LocationId);
 
-        var locationResult = await _locationsRepository.GetById(locationId, cancellationToken);
+        var locationResult = await locationsRepository.GetById(locationId, cancellationToken);
         if (locationResult.IsFailure)
         {
             return locationResult.Error.ToErrors();
         }
 
-        _locationsRepository.Delete(locationResult.Value);
+        locationsRepository.Delete(locationResult.Value);
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
         if (saveResult.IsFailure)
         {
             return saveResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Deleted location with id {locationId}", locationId.Value);
+        logger.LogInformation("Deleted location with id {locationId}", locationId.Value);
         
         return locationId.Value;
     }

@@ -8,28 +8,16 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 
-public class UpdateLocationHandler
+public class UpdateLocationHandler(
+    ILocationsRepository locationsRepository,
+    ILogger<UpdateLocationHandler> logger,
+    IValidator<UpdateLocationCommand> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<UpdateLocationHandler> _logger;
-    private readonly IValidator<UpdateLocationCommand> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public UpdateLocationHandler(ILocationsRepository locationsRepository,
-        ILogger<UpdateLocationHandler> logger,
-        IValidator<UpdateLocationCommand> validator,
-        ITransactionManager transactionManager)
-    {
-        _locationsRepository = locationsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(UpdateLocationCommand updateLocationCommand, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updateLocationCommand, cancellationToken);
+        var validationResult = await validator.ValidateAsync(updateLocationCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
@@ -37,7 +25,7 @@ public class UpdateLocationHandler
         
         var locationCreateResult = CreateLocation(updateLocationCommand);
         
-        var existsByAddress = await _locationsRepository
+        var existsByAddress = await locationsRepository
             .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
 
         if (existsByAddress.Value)
@@ -45,7 +33,7 @@ public class UpdateLocationHandler
             return GeneralErrors.AlreadyExistByAddress().ToErrors();
         }
         
-        var locationResult = await _locationsRepository.GetById(locationCreateResult.Value.Id.Value, cancellationToken);
+        var locationResult = await locationsRepository.GetById(locationCreateResult.Value.Id.Value, cancellationToken);
         if (locationResult.IsFailure)
         {
             return locationResult.Error.ToErrors();
@@ -55,14 +43,14 @@ public class UpdateLocationHandler
             locationCreateResult.Value.Address,  
             locationCreateResult.Value.Timezone);
         
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
             return saveResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Updated location with id {locationId}", locationCreateResult.Value.Id.Value);
+        logger.LogInformation("Updated location with id {locationId}", locationCreateResult.Value.Id.Value);
         
         return locationCreateResult.Value.Id.Value;
     }

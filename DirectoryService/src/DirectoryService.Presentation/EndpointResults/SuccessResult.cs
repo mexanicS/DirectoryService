@@ -3,20 +3,13 @@ using SharedKernel;
 
 namespace DirectoryService.Presentation.EndpointResults;
 
-public sealed class SuccessResult<TValue> : IResult
+public sealed class SuccessResult<TValue>(TValue value) : IResult
 {
-    private readonly TValue _value;
-
-    public SuccessResult(TValue value)
-    {
-        _value = value;
-    }
-
     public Task ExecuteAsync(HttpContext httpContext)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        var envelope = Envelope.Ok(_value);
+        var envelope = Envelope.Ok(value);
 
         httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
 

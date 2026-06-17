@@ -9,51 +9,37 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 
-public class UpdateLocationsByDepartmentHandler
+public class UpdateLocationsByDepartmentHandler(
+    IDepartmentsRepository departmentsRepository,
+    ILocationsRepository locationsRepository,
+    ILogger<UpdateLocationsByDepartmentHandler> logger,
+    IValidator<UpdateLocationsByDepartmentCommand> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly IDepartmentsRepository _departmentsRepository;
-    private readonly ILocationsRepository _locationsRepository;
-    private readonly ILogger<UpdateLocationsByDepartmentHandler> _logger;
-    private readonly IValidator<UpdateLocationsByDepartmentCommand> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public UpdateLocationsByDepartmentHandler(IDepartmentsRepository departmentsRepository,
-        ILocationsRepository locationsRepository,
-        ILogger<UpdateLocationsByDepartmentHandler> logger,
-        IValidator<UpdateLocationsByDepartmentCommand> validator, 
-        ITransactionManager transactionManager)
-    {
-        _departmentsRepository = departmentsRepository;
-        _locationsRepository = locationsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(
         UpdateLocationsByDepartmentCommand updateDepartmentCommand,
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(updateDepartmentCommand, cancellationToken);
+        var validationResult = await validator.ValidateAsync(updateDepartmentCommand, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
         
-        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
         
         if (transactionScopeResult.IsFailure)
             return transactionScopeResult.Error.ToErrors();
 
         var transactionScope = transactionScopeResult.Value;
         
-        var department = await _departmentsRepository.GetById(updateDepartmentCommand.DepartmentId, cancellationToken);
+        var department = await departmentsRepository.GetById(updateDepartmentCommand.DepartmentId, cancellationToken);
         if (department.IsFailure)
         {
             return department.Error.ToErrors();
         }
         
-        var locationExists = await _locationsRepository.GetActiveLocationsById(updateDepartmentCommand.LocationIds, cancellationToken);
+        var locationExists = await locationsRepository.GetActiveLocationsById(updateDepartmentCommand.LocationIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();
@@ -63,11 +49,11 @@ public class UpdateLocationsByDepartmentHandler
             .Select(location => DepartmentLocation.Create(department.Value.Id, location.Id))
             .ToList();
         
-        await _departmentsRepository.DeleteLocationsByDepartmentId(department.Value.Id, cancellationToken);
+        await departmentsRepository.DeleteLocationsByDepartmentId(department.Value.Id, cancellationToken);
 
-        await _departmentsRepository.AddDepartmentLocations(departmentLocations.Select(result => result.Value), cancellationToken);
+        await departmentsRepository.AddDepartmentLocations(departmentLocations.Select(result => result.Value), cancellationToken);
         
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
@@ -85,7 +71,7 @@ public class UpdateLocationsByDepartmentHandler
             return commitResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Department with id={Id}, has updated locations", updateDepartmentCommand.DepartmentId);
+        logger.LogInformation("Department with id={Id}, has updated locations", updateDepartmentCommand.DepartmentId);
         
         return department.Value.Id.Value;
     }

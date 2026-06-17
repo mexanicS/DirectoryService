@@ -11,38 +11,24 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 
-public class CreatePositionHandler
+public class CreatePositionHandler(
+    IPositionsRepository positionsRepository,
+    IDepartmentsRepository departmentsRepository,
+    ILogger<CreatePositionHandler> logger,
+    IValidator<CreatePositionDto> validator,
+    ITransactionManager transactionManager)
 {
-    private readonly IPositionsRepository _positionsRepository;
-    private readonly IDepartmentsRepository _departmentsRepository;
-    private readonly ILogger<CreatePositionHandler> _logger;
-    private readonly IValidator<CreatePositionDto> _validator;
-    private readonly ITransactionManager _transactionManager;
-
-    public CreatePositionHandler(IPositionsRepository positionsRepository,
-        IDepartmentsRepository departmentsRepository,
-        ILogger<CreatePositionHandler> logger,
-        IValidator<CreatePositionDto> validator,
-        ITransactionManager transactionManager)
-    {
-        _positionsRepository = positionsRepository;
-        _departmentsRepository = departmentsRepository;
-        _logger = logger;
-        _validator = validator;
-        _transactionManager = transactionManager;
-    }
-
     public async Task<Result<Guid, Errors>> Handle(
         CreatePositionDto createPositionDto, 
         CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(createPositionDto, cancellationToken);
+        var validationResult = await validator.ValidateAsync(createPositionDto, cancellationToken);
         if (!validationResult.IsValid)
         {
             return validationResult.ToErrors();
         }
         
-        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
         
         if (transactionScopeResult.IsFailure)
             return transactionScopeResult.Error.ToErrors();
@@ -54,13 +40,13 @@ public class CreatePositionHandler
         var description = Description.Create(createPositionDto.Description).Value;
         var departmentIds = createPositionDto.DepartmentIds.ToList();
         
-        var activePositionByName = await _positionsRepository.IsActivePositionByName(positionName, cancellationToken);
+        var activePositionByName = await positionsRepository.IsActivePositionByName(positionName, cancellationToken);
         if (activePositionByName.Value)
         {
             return GeneralErrors.AlreadyExist().ToErrors();
         }
         
-        var locationExists = await _departmentsRepository.DepartmentsExists(departmentIds, cancellationToken);
+        var locationExists = await departmentsRepository.DepartmentsExists(departmentIds, cancellationToken);
         if (locationExists.IsFailure)
         {
             return locationExists.Error.ToErrors();
@@ -68,13 +54,13 @@ public class CreatePositionHandler
 
         var newPosition = Position.Create(positionId, positionName, description);
 
-        var addPositionResult = await _positionsRepository.Add(newPosition.Value, cancellationToken);
+        var addPositionResult = await positionsRepository.Add(newPosition.Value, cancellationToken);
         if (addPositionResult.IsFailure)
         {
             return addPositionResult.Error;
         }
         
-        var departmentsResult = await _departmentsRepository
+        var departmentsResult = await departmentsRepository
             .GetByIdsWithPositions(departmentIds, cancellationToken);
 
         if (departmentsResult.IsFailure)
@@ -97,7 +83,7 @@ public class CreatePositionHandler
             }
         }
 
-        var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
 
         if (saveResult.IsFailure)
         {
@@ -115,7 +101,7 @@ public class CreatePositionHandler
             return commitResult.Error.ToErrors();
         }
         
-        _logger.LogInformation("Position created with id={Id}", positionId.Value);
+        logger.LogInformation("Position created with id={Id}", positionId.Value);
 
         return newPosition.Value.Id.Value;
     }

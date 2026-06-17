@@ -7,19 +7,13 @@ using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
-public class PositionRepository : BaseRepository<Position>, IPositionsRepository
+public class PositionRepository(
+    DirectoryServiceDbContext context,
+    ILogger<PositionRepository> logger)
+    : BaseRepository<Position>(context, logger), IPositionsRepository
 {
-    private readonly DirectoryServiceDbContext _context;
-    private readonly ILogger<PositionRepository> _logger;
+    private readonly DirectoryServiceDbContext _context = context;
 
-    public PositionRepository(DirectoryServiceDbContext context, 
-        ILogger<PositionRepository> logger) 
-        : base(context, logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-    
     public async Task<Result<Guid, Errors>> Add(Position position,
         CancellationToken cancellationToken)
     {
@@ -32,7 +26,7 @@ public class PositionRepository : BaseRepository<Position>, IPositionsRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error to add position");
+            logger.LogError(ex, "Error to add position");
             return GeneralErrors.Failure().ToErrors();
         }
     }

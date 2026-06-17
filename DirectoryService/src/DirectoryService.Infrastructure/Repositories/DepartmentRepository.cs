@@ -9,17 +9,12 @@ using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Repositories;
 
-public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepository
+public class DepartmentRepository(
+    DirectoryServiceDbContext context,
+    ILogger<DepartmentRepository> logger)
+    : BaseRepository<Department>(context, logger), IDepartmentsRepository
 {
-    private readonly DirectoryServiceDbContext _context;
-    private readonly ILogger<DepartmentRepository> _logger;
-
-    public DepartmentRepository(DirectoryServiceDbContext context,
-        ILogger<DepartmentRepository> logger) : base(context, logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
+    private readonly DirectoryServiceDbContext _context = context;
 
     public async Task<Result<Guid, Errors>> Add(Department department,
         CancellationToken cancellationToken)
@@ -33,12 +28,12 @@ public class DepartmentRepository : BaseRepository<Department>, IDepartmentsRepo
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
-            _logger.LogWarning(ex, "Location with this name already exists");
+            logger.LogWarning(ex, "Location with this name already exists");
             return GeneralErrors.AlreadyExist().ToErrors();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error to add department");
+            logger.LogError(ex, "Error to add department");
             return GeneralErrors.Failure().ToErrors();
         }
     }

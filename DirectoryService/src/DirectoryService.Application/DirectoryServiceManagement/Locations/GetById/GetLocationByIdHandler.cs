@@ -7,20 +7,13 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
 
-public class GetLocationByIdHandler
+public class GetLocationByIdHandler(IReadDbContext readDb)
 {
-    private readonly IReadDbContext _readDb;
-
-    public GetLocationByIdHandler(IReadDbContext readDb)
-    {
-        _readDb = readDb;
-    }
-
     public async Task<Result<LocationResponse, Error>> Handle(
         GetLocationByIdQuery query,
         CancellationToken cancellationToken = default)
     {
-        var response = await _readDb.Locations
+        var response = await readDb.Locations
             .Where(l => l.Id == query.Id && l.IsActive)
             .Select(l => new LocationResponse(
                 l.Id.Value,
