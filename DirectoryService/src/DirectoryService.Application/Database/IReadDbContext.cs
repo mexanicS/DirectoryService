@@ -4,7 +4,7 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 
-namespace DirectoryService.Application.DataBase;
+namespace DirectoryService.Application.Database;
 
 public interface IReadDbContext
 {

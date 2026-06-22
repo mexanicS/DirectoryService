@@ -1,7 +1,8 @@
 using CSharpFunctionalExtensions;
+
 using SharedKernel;
 
-namespace DirectoryService.Application.DataBase;
+namespace DirectoryService.Application.Database;
 
 public interface ITransactionScope
 {
