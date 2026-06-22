@@ -44,6 +44,9 @@ public class GetLocationsHandler(
             havingClause.Append("HAVING COUNT(dl.department_id) >= @MinDepartmentCount");
             parameters.Add("MinDepartmentCount", query.MinDepartmentCount.Value, DbType.Int32);
         }
+        
+        var sortBy = string.IsNullOrWhiteSpace(query.SortBy) ? "Name" : query.SortBy;
+        var sortDir = string.IsNullOrWhiteSpace(query.SortDir) ? "asc" : query.SortDir;
 
         var sql = $"""
             WITH filtered_locations AS (
@@ -66,7 +69,7 @@ public class GetLocationsHandler(
                     DepartmentCount,
                    COUNT(*) OVER() AS TotalCount
             FROM filtered_locations
-            ORDER BY {query.SortBy} {query.SortDir}
+            ORDER BY {sortBy} {sortDir}
             LIMIT @PageSize OFFSET @Offset;
             """;
 
