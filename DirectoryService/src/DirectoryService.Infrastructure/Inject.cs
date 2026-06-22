@@ -1,5 +1,4 @@
-
-using DirectoryService.Application.DataBase;
+using DirectoryService.Application.Database;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.DirectoryServiceManagement.Positions;
@@ -31,6 +30,7 @@ public static class Inject
             new DirectoryServiceDbContext(configuration.GetConnectionString("Database")!));
 
         services.AddScoped<IReadDbContext, ReadDbContext>();
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
         
         return services;
     }
