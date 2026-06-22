@@ -1,4 +1,7 @@
 using CSharpFunctionalExtensions;
+
+using DirectoryService.Application.Database;
+
 using SharedKernel;
 
 namespace DirectoryService.Application.DataBase;
