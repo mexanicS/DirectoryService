@@ -1,7 +1,6 @@
 using CSharpFunctionalExtensions;
 
 using DirectoryService.Application.Database;
-using DirectoryService.Application.DataBase;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using SharedKernel;

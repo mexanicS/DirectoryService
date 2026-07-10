@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.DataBase;
+using DirectoryService.Application.Database;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Positions;
 using FluentValidation;

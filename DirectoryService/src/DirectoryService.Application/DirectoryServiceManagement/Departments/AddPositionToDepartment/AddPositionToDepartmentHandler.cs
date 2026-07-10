@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using DirectoryService.Application.DataBase;
+using DirectoryService.Application.Database;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Positions;
 using DirectoryService.Application.Validation;
