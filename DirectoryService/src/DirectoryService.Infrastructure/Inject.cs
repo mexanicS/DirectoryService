@@ -1,5 +1,4 @@
 using DirectoryService.Application.Database;
-using DirectoryService.Application.DataBase;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.DirectoryServiceManagement.Positions;
