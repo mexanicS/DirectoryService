@@ -11,7 +11,7 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments.So
 
 public class SoftDeleteDepartmentHandler(
     IDepartmentsRepository departmentsRepository,
-    ILogger<DeleteDepartmentHandler> logger,
+    ILogger<SoftDeleteDepartmentHandler> logger,
     IValidator<DeleteDepartmentCommand> validator,
     ITransactionManager transactionManager)
 {
