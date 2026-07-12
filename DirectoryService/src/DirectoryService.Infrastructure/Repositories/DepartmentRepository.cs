@@ -165,11 +165,25 @@ public class DepartmentRepository(
         _context.Departments.Remove(department);
     }
     
+    public void DeleteRange(IReadOnlyList<Department> departments)
+    {
+        _context.Departments.RemoveRange(departments);
+    }
+
+    public async Task<IReadOnlyList<Department>> GetExpiredSoftDeletedLeaves(DateTime expirationTime, int limit, CancellationToken cancellationToken)
+    {
+        return await _context.Departments
+            .IgnoreQueryFilters()
+            .Where(d => d.IsDeleted && d.SoftDeletedAt < expirationTime)
+            .Where(d => !_context.Departments.IgnoreQueryFilters().Any(child => child.ParentId == d.Id))
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
+    
     public async Task<Result<(Department Target, List<Department> Children), Error>> GetDepartmentWithChildren(
         DepartmentId departmentId, 
         CancellationToken cancellationToken)
     {
-        // 1. Загружаем целевой отдел
         var targetDepartment = await _context.Departments
             .FirstOrDefaultAsync(d => d.Id == departmentId, cancellationToken);
 
@@ -177,9 +191,7 @@ public class DepartmentRepository(
         {
             return GeneralErrors.NotFound(departmentId.Value, nameof(Department));
         }
-
-        // 2. Рекурсивно загружаем все дочерние элементы в память контекста EF
-        // Мы просто обходим дерево вниз. EF Core автоматически начнет отслеживать (track) их все!
+        
         var children = new List<Department>();
         await LoadChildrenRecursive(targetDepartment, children, cancellationToken);
 

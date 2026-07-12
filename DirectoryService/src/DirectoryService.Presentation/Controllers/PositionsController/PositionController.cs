@@ -39,7 +39,7 @@ public class PositionController : ControllerBase
     
     [HttpDelete("/api/positions/{positionId:guid}")]
     public async Task<EndpointResult<Guid>> DeletePosition(
-        [FromServices] DeletePositionHandler handler,
+        [FromServices] SoftDeletePositionHandler handler,
         [FromRoute] Guid positionId, 
         CancellationToken cancellationToken = default)
     {

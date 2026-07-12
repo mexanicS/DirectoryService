@@ -40,6 +40,10 @@ public sealed class Location
      
     public DateTime? UpdatedAt { get; private set; }
     
+    public DateTime? SoftDeletedAt { get; private set; }
+
+    public bool IsDeleted { get; private set; }
+    
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
     public static Result<Location> Create(
@@ -60,5 +64,11 @@ public sealed class Location
         Timezone = timezone;
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+        SoftDeletedAt = DateTime.UtcNow;
+    }
+
 }

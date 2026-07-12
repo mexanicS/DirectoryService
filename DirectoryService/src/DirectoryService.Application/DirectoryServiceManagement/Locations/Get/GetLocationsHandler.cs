@@ -30,7 +30,7 @@ public class GetLocationsHandler(
         parameters.Add("PageSize", query.PageSize, DbType.Int32);
         parameters.Add("Offset", offset, DbType.Int32);
 
-        var whereClause = new StringBuilder("WHERE l.is_active = true");
+        var whereClause = new StringBuilder("WHERE l.is_active = true AND l.is_deleted = false");
         var havingClause = new StringBuilder();
 
         if (!string.IsNullOrWhiteSpace(query.Search))

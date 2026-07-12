@@ -21,4 +21,9 @@ public interface ILocationsRepository
         CancellationToken cancellationToken);
 
     void Delete(Location location);
+
+    Task<IReadOnlyList<Location>> GetExpiredSoftDeleted(DateTime expirationTime, int limit,
+        CancellationToken cancellationToken);
+
+    void DeleteRange(IReadOnlyList<Location> entity);
 }

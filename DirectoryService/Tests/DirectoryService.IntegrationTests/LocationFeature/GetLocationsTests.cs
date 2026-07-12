@@ -32,6 +32,41 @@ public class GetLocationsTests : DirectoryBaseTests<GetLocationsHandler>
     }
 
     [Fact]
+    public async Task GetLocations_should_exclude_softdeleted_locations()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        await CreateLocationInDb("Active Office");
+        await CreateSoftDeletedLocationInDb("SoftDeleted Office");
+
+        var query = new GetLocationsQuery("Office", null, null, null, 1, 20);
+
+        // act
+        var result = await ExecuteHandler(sut => sut.Handle(query, cancellationToken));
+
+        // assert
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Items, x => x.Name == "Active Office");
+        Assert.DoesNotContain(result.Value.Items, x => x.Name == "SoftDeleted Office");
+    }
+
+    private async Task CreateSoftDeletedLocationInDb(string name)
+    {
+        await ExecuteContext(async context =>
+        {
+            var locationId = new LocationId(Guid.NewGuid());
+            var location = new Location(
+                locationId,
+                LocationName.Create(name).Value,
+                Address.Create("Tomsk", "Istochnaya", Guid.NewGuid().ToString().Substring(0, 4), "634000").Value,
+                Timezone.Create("normis").Value);
+            location.SoftDelete();
+            context.Locations.Add(location);
+            await context.SaveChangesAsync();
+        });
+    }
+
+    [Fact]
     public async Task GetLocations_with_invalid_page_should_fail()
     {
         // arrange

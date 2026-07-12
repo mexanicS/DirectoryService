@@ -6,7 +6,7 @@ namespace DirectoryService.IntegrationTests.PositionFeature;
 
 [Trait("Category", "Integration")]
 [Trait("Service", "DirectoryService")]
-public class DeletePositionTests : DirectoryBaseTests<DeletePositionHandler>
+public class DeletePositionTests : DirectoryBaseTests<SoftDeletePositionHandler>
 {
     public DeletePositionTests(DirectoryTestWebFactory factory) : base(factory)
     {
@@ -30,8 +30,10 @@ public class DeletePositionTests : DirectoryBaseTests<DeletePositionHandler>
 
         await ExecuteContext(async context =>
         {
-            var exists = await context.Positions.AnyAsync(p => p.Id == positionId, cancellationToken);
-            Assert.False(exists);
+            var exists = await context.Positions.IgnoreQueryFilters().Where(p => p.Id == positionId && p.IsDeleted)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            Assert.True(exists?.IsDeleted);
         });
     }
 

@@ -8,9 +8,9 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Positions.Delete;
 
-public class DeletePositionHandler(
+public class SoftDeletePositionHandler(
     IPositionsRepository positionsRepository,
-    ILogger<DeletePositionHandler> logger,
+    ILogger<SoftDeletePositionHandler> logger,
     IValidator<DeletePositionCommand> validator,
     ITransactionManager transactionManager)
 {
@@ -32,7 +32,7 @@ public class DeletePositionHandler(
             return positionResult.Error.ToErrors();
         }
 
-        positionsRepository.Delete(positionResult.Value);
+        positionResult.Value.SoftDelete();
 
         var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
         if (saveResult.IsFailure)
@@ -40,7 +40,7 @@ public class DeletePositionHandler(
             return saveResult.Error.ToErrors();
         }
         
-        logger.LogInformation("Position deleted with id={Id}", positionId.Value);
+        logger.LogInformation("Position soft deleted with id={Id}", positionId.Value);
 
         return positionId.Value;
     }

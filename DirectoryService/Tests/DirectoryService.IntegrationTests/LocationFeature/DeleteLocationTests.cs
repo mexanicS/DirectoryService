@@ -6,7 +6,7 @@ namespace DirectoryService.IntegrationTests.LocationFeature;
 
 [Trait("Category", "Integration")]
 [Trait("Service", "DirectoryService")]
-public class DeleteLocationTests : DirectoryBaseTests<DeleteLocationHandler>
+public class DeleteLocationTests : DirectoryBaseTests<SoftDeleteLocationHandler>
 {
     public DeleteLocationTests(DirectoryTestWebFactory factory) : base(factory)
     {
@@ -32,8 +32,10 @@ public class DeleteLocationTests : DirectoryBaseTests<DeleteLocationHandler>
 
         await ExecuteContext(async context =>
         {
-            var exists = await context.Locations.AnyAsync(l => l.Id == locationId, cancellationToken);
-            Assert.False(exists);
+            var exists = await context.Locations.IgnoreQueryFilters().Where(l => l.Id == locationId && l.IsDeleted)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            Assert.True(exists?.IsDeleted);
         });
     }
 

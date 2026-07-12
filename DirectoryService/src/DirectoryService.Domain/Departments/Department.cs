@@ -56,6 +56,10 @@ public sealed class Department
      
      public DateTime? UpdatedAt { get; private set; }
      
+     public DateTime? SoftDeletedAt { get; private set; }
+
+     public bool IsDeleted { get; private set; }
+     
      public IReadOnlyList<Department> DepartmentsChildren => _departmentsChildren;
      
      public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
@@ -201,5 +205,11 @@ public sealed class Department
          _departmentPositions.Remove(departmentPosition);
 
          return Result.Success<Error>();
+     }
+
+     public void SoftDelete()
+     {
+         IsDeleted = true;
+         SoftDeletedAt = DateTime.UtcNow;
      }
 }

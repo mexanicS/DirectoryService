@@ -8,9 +8,9 @@ using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
 
-public class DeleteLocationHandler(
+public class SoftDeleteLocationHandler(
     ILocationsRepository locationsRepository,
-    ILogger<DeleteLocationHandler> logger,
+    ILogger<SoftDeleteLocationHandler> logger,
     IValidator<DeleteLocationCommand> validator,
     ITransactionManager transactionManager)
 {
@@ -31,7 +31,7 @@ public class DeleteLocationHandler(
             return locationResult.Error.ToErrors();
         }
 
-        locationsRepository.Delete(locationResult.Value);
+        locationResult.Value.SoftDelete();
 
         var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
         if (saveResult.IsFailure)
@@ -39,7 +39,7 @@ public class DeleteLocationHandler(
             return saveResult.Error.ToErrors();
         }
         
-        logger.LogInformation("Deleted location with id {locationId}", locationId.Value);
+        logger.LogInformation("Soft Deleted location with id {locationId}", locationId.Value);
         
         return locationId.Value;
     }

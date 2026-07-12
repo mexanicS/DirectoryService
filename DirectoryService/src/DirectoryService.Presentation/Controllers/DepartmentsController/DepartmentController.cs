@@ -5,6 +5,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Get;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
@@ -56,6 +57,8 @@ public class DepartmentController : ControllerBase
         
         return await handler.Handle(command, cancellationToken);
     }
+    
+    
 
     [HttpPost("/api/departments")]
     public async Task<EndpointResult<Guid>> CreateDepartment(
@@ -81,6 +84,17 @@ public class DepartmentController : ControllerBase
     [HttpDelete("/api/departments/{departmentId:guid}")]
     public async Task<EndpointResult<Guid>> DeleteDepartment(
         [FromServices] DeleteDepartmentHandler handler,
+        [FromRoute] Guid departmentId,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new DeleteDepartmentCommand(departmentId);
+        
+        return await handler.Handle(command, cancellationToken);
+    }
+    
+    [HttpDelete("/api/softdeletedepartments/{departmentId:guid}")]
+    public async Task<EndpointResult<Guid>> SoftDeleteDepartment(
+        [FromServices] SoftDeleteDepartmentHandler handler,
         [FromRoute] Guid departmentId,
         CancellationToken cancellationToken = default)
     {
