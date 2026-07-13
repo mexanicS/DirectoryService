@@ -91,7 +91,7 @@ public class DepartmentController : ControllerBase
         
         return await handler.Handle(command, cancellationToken);
     }
-    
+    //TODO:
     [HttpDelete("/api/softdeletedepartments/{departmentId:guid}")]
     public async Task<EndpointResult<Guid>> SoftDeleteDepartment(
         [FromServices] SoftDeleteDepartmentHandler handler,
