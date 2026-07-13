@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
+﻿using System;
+
+namespace DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
 
 public record RemovePositionFromDepartmentCommand(
     Guid DepartmentId, 

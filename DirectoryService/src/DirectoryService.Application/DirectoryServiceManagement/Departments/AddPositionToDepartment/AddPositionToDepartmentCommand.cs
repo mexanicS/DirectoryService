@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
+﻿using System;
+
+namespace DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 
 public record AddPositionToDepartmentCommand(
     Guid DepartmentId, 

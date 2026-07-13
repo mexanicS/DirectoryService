@@ -1,4 +1,6 @@
-﻿namespace DirectoryService.Application.DirectoryServiceManagement.DTOs;
+﻿using System;
+
+namespace DirectoryService.Application.DirectoryServiceManagement.DTOs;
 
 public record CreateDepartmentDto(
     string Name,

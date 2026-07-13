@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Linq;
+using FluentValidation;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 

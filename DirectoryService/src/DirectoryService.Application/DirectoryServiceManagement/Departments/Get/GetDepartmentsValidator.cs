@@ -1,4 +1,6 @@
-﻿using DirectoryService.Contract;
+﻿using System;
+using System.Collections.Generic;
+using DirectoryService.Contract;
 
 using FluentValidation;
 
