@@ -35,6 +35,10 @@ public sealed class Position
      
     public DateTime? UpdatedAt { get; set; }
     
+    public DateTime? SoftDeletedAt { get; private set; }
+
+    public bool IsDeleted { get; private set; }
+    
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
     public static Result<Position> Create(
@@ -52,5 +56,11 @@ public sealed class Position
         Name = name;
         Description = description;
         UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+        SoftDeletedAt = DateTime.UtcNow;
     }
 }

@@ -108,4 +108,19 @@ public class LocationsRepository(
     {
         _context.Locations.Remove(location);
     }
+    
+    public void DeleteRange(IReadOnlyList<Location> locations)
+    {
+        _context.Locations.RemoveRange(locations);
+    }
+
+    public async Task<IReadOnlyList<Location>> GetExpiredSoftDeleted(DateTime expirationTime, int limit,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Locations
+            .IgnoreQueryFilters()
+            .Where(l => l.IsDeleted && l.SoftDeletedAt < expirationTime)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
 }

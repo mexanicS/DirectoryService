@@ -70,8 +70,8 @@ public class LocationController : ControllerBase
     }
     
     [HttpDelete("/api/locations/{locationId:guid}")]
-    public async Task<EndpointResult<Guid>> DeleteLocation(
-        [FromServices] DeleteLocationHandler handler,
+    public async Task<EndpointResult<Guid>> SoftDeleteLocation(
+        [FromServices] SoftDeleteLocationHandler handler,
         [FromRoute] Guid locationId,
         CancellationToken cancellationToken = default)
     {

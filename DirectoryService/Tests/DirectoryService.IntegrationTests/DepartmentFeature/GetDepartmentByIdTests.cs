@@ -50,6 +50,51 @@ public class GetDepartmentByIdTests : DirectoryBaseTests<GetDepartmentByIdHandle
         Assert.True(result.IsFailure);
     }
 
+    [Fact]
+    public async Task GetDepartmentById_with_softdeleted_id_should_fail()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        var departmentId = await CreateSoftDeletedDepartmentInDb("Finance Deleted", "financeDeleted");
+
+        // act
+        var result = await ExecuteHandler(sut =>
+        {
+            var query = new GetDepartmentByIdQuery(departmentId.Value);
+            return sut.Handle(query, cancellationToken);
+        });
+
+        // assert
+        Assert.True(result.IsFailure);
+    }
+
+    private async Task<DepartmentId> CreateSoftDeletedDepartmentInDb(string name, string identifier)
+    {
+        return await ExecuteContext(async context =>
+        {
+            var locationId = new LocationId(Guid.NewGuid());
+            var location = new Location(
+                locationId,
+                LocationName.Create("Tomsk").Value,
+                Address.Create("Tomsk", "Istochnaya", "42", "634000").Value,
+                Timezone.Create("normis").Value);
+            context.Locations.Add(location);
+
+            var departmentId = new DepartmentId(Guid.NewGuid());
+            var departmentLocation = DepartmentLocation.Create(departmentId, locationId).Value;
+            var department = Department.CreateParent(
+                DepartmentName.Create(name).Value,
+                Identifier.Create(identifier).Value,
+                [departmentLocation],
+                departmentId).Value;
+            department.SoftDelete();
+            context.Departments.Add(department);
+
+            await context.SaveChangesAsync();
+            return departmentId;
+        });
+    }
+
     private async Task<DepartmentId> CreateDepartmentInDb(string name, string identifier)
     {
         return await ExecuteContext(async context =>

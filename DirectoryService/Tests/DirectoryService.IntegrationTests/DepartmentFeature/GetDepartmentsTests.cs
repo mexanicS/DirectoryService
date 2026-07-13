@@ -37,6 +37,47 @@ public class GetDepartmentsTests : DirectoryBaseTests<GetDepartmentsHandler>
         Assert.NotEmpty(result.Value.Items);
     }
 
+    [Fact]
+    public async Task GetDepartments_should_exclude_softdeleted_departments()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        var location = await CreateLocationInDb();
+
+        await CreateDepartmentInDb("Active Department", "activedep", location);
+        await CreateSoftDeletedDepartmentInDb("SoftDeleted Department", "deleteddep", location);
+
+        // act
+        var result = await ExecuteHandler(sut =>
+        {
+            var query = new GetDepartmentsQuery(null, null, null, new PaginationRequest(1, 20));
+            return sut.Handle(query, cancellationToken);
+        });
+
+        // assert
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Items, x => x.Name == "Active Department");
+        Assert.DoesNotContain(result.Value.Items, x => x.Name == "SoftDeleted Department");
+    }
+
+    private async Task CreateSoftDeletedDepartmentInDb(string name, string identifier, Location location)
+    {
+        await ExecuteContext(async context =>
+        {
+            var departmentId = new DepartmentId(Guid.NewGuid());
+            var departmentLocation = DepartmentLocation.Create(departmentId, location.Id).Value;
+            var department = Department.CreateParent(
+                DepartmentName.Create(name).Value,
+                Identifier.Create(identifier).Value,
+                [departmentLocation],
+                departmentId).Value;
+            department.SoftDelete();
+            context.Departments.Add(department);
+
+            await context.SaveChangesAsync();
+        });
+    }
+
     private async Task<Location> CreateLocationInDb()
     {
         return await ExecuteContext(async context =>

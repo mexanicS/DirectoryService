@@ -40,6 +40,10 @@ public interface IDepartmentsRepository
 
     void Delete(Department department);
 
+    void DeleteRange(IReadOnlyList<Department> departments);
+
+    Task<IReadOnlyList<Department>> GetExpiredSoftDeletedLeaves(DateTime expirationTime, int limit, CancellationToken cancellationToken);
+
     Task<Result<(Department Target, List<Department> Children), Error>> GetDepartmentWithChildren(
         DepartmentId departmentId,
         CancellationToken cancellationToken);

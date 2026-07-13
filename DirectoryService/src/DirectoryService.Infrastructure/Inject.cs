@@ -18,6 +18,8 @@ public static class Inject
         services
             .AddDbContexts(configuration)
             .AddRepositories();
+
+        services.AddHostedService<BackgroundServices.SoftDeletePurgeBackgroundService>();
         
         return services;
     }

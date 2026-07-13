@@ -61,4 +61,18 @@ public class PositionRepository(
     {
         _context.Positions.Remove(position);
     }
+    
+    public void DeleteRange(IReadOnlyList<Position> positions)
+    {
+        _context.Positions.RemoveRange(positions);
+    }
+
+    public async Task<IReadOnlyList<Position>> GetExpiredSoftDeleted(DateTime expirationTime, int limit, CancellationToken cancellationToken)
+    {
+        return await _context.Positions
+            .IgnoreQueryFilters()
+            .Where(p => p.IsDeleted && p.SoftDeletedAt < expirationTime)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
 }

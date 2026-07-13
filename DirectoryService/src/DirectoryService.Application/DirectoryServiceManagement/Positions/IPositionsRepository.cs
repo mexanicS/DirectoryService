@@ -18,4 +18,8 @@ public interface IPositionsRepository
         CancellationToken cancellationToken);
 
     void Delete(Position position);
+
+    void DeleteRange(IReadOnlyList<Position> positions);
+
+    Task<IReadOnlyList<Position>> GetExpiredSoftDeleted(DateTime expirationTime, int limit, CancellationToken cancellationToken);
 }

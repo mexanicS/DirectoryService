@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.DepartmentLocations;
+using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.DepartmentPositions;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
@@ -32,6 +32,10 @@ public class DirectoryServiceDbContext(string connectionString) : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DirectoryServiceDbContext).Assembly,
             type => type.FullName?.ToLower().Contains("configuration") ?? false);
+
+        modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
+        modelBuilder.Entity<Location>().HasQueryFilter(l => !l.IsDeleted);
+        modelBuilder.Entity<Position>().HasQueryFilter(p => !p.IsDeleted);
     }
     
     private ILoggerFactory CreateLoggerFactory() => 

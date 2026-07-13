@@ -5,6 +5,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Get;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.RemovePositionFromDepartment;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
@@ -28,7 +29,7 @@ public static class Inject
     {
         services.AddScoped<CreateLocationHandler>();
         services.AddScoped<UpdateLocationHandler>();
-        services.AddScoped<DeleteLocationHandler>();
+        services.AddScoped<SoftDeleteLocationHandler>();
         
         services.AddScoped<LinkDepartmentAndLocationHandler>();
         
@@ -37,10 +38,11 @@ public static class Inject
         services.AddScoped<CreateDepartmentHandler>();
         services.AddScoped<UpdateDepartmentHandler>();
         services.AddScoped<DeleteDepartmentHandler>();
+        services.AddScoped<SoftDeleteDepartmentHandler>();
         
         services.AddScoped<CreatePositionHandler>();
         services.AddScoped<UpdatePositionHandler>();
-        services.AddScoped<DeletePositionHandler>();
+        services.AddScoped<SoftDeletePositionHandler>();
         
         services.AddScoped<UpdateLocationsByDepartmentHandler>();
         
@@ -55,6 +57,7 @@ public static class Inject
         services.AddScoped<GetLocationsHandler>();
         
         services.AddScoped<GetDepartmentsHandler>();
+        
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         
