@@ -6,7 +6,7 @@ namespace DirectoryService.Domain.Departments;
 
 public record Path
 {
-    private const char SEPARATOR = '/';
+    private const char SEPARATOR = '.';
     public string Value { get; }
 
     private Path(string value)

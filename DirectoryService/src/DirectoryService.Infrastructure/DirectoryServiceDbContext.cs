@@ -28,14 +28,17 @@ public class DirectoryServiceDbContext(string connectionString) : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
         modelBuilder.HasDefaultSchema("DirectoryService");
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DirectoryServiceDbContext).Assembly,
             type => type.FullName?.ToLower().Contains("configuration") ?? false);
-
+        
         modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
         modelBuilder.Entity<Location>().HasQueryFilter(l => !l.IsDeleted);
         modelBuilder.Entity<Position>().HasQueryFilter(p => !p.IsDeleted);
+
+        modelBuilder.HasPostgresExtension("ltree");
     }
     
     private ILoggerFactory CreateLoggerFactory() => 

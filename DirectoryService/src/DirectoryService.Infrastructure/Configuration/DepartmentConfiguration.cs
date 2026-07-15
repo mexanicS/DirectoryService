@@ -43,8 +43,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         
         builder.Property(p => p.Path)
             .HasColumnName("path")
+            .HasColumnType("ltree")
             .IsRequired()
-            .HasMaxLength(Constants.MAX_LENGTH_DEPARTMENT_PATH)
             .HasConversion(
                 name => name.Value, 
                 value => Path.Create(value).Value);
@@ -90,5 +90,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasIndex(x => x.Identifier).IsUnique();
+        
+        builder.HasIndex(x => x.Path).HasMethod("gist").HasDatabaseName("idx_departments_path");
+            
     }
 }
