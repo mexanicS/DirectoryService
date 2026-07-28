@@ -1,5 +1,6 @@
 using DirectoryService.Application;
 using DirectoryService.Infrastructure;
+using DirectoryService.Presentation.Controllers.DepartmentChildrenController;
 using DirectoryService.Presentation.Controllers.DepartmentsController;
 using DirectoryService.Presentation.Controllers.LocationsController;
 using DirectoryService.Presentation.Controllers.PositionsController;
@@ -25,7 +26,8 @@ Log.Logger = new LoggerConfiguration()
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(DepartmentController).Assembly)
     .AddApplicationPart(typeof(LocationController).Assembly)
-    .AddApplicationPart(typeof(PositionController).Assembly);
+    .AddApplicationPart(typeof(PositionController).Assembly)
+    .AddApplicationPart(typeof(DepartmentTreeController).Assembly);
 
 builder.Services.AddOpenApi();
 
