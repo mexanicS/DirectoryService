@@ -11,6 +11,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetAncestorsByPath;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetDirectChildrenByNode;
+using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetNodesByName;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetRootNodeDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Delete;
@@ -64,6 +65,7 @@ public static class Inject
         services.AddScoped<GetRootNodeDepartmentHandler>();
         services.AddScoped<GetDirectChildrenByNodeHandler>();
         services.AddScoped<GetAncestorsByPathHandler>();
+        services.AddScoped<GetNodesByNameHandler>();
         
         services.AddValidatorsFromAssembly(typeof(Inject).Assembly);
         

@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using Dapper;
 using DirectoryService.Application.Database;
 using DirectoryService.Contract;
@@ -15,10 +15,15 @@ public class GetAncestorsByPathHandler(
     {
         const string dapperSql = """
                                      select 
-                                         department.id, 
-                                         department.name, 
-                                         department.path, 
-                                         department.depth
+                                         department.id as "Id", 
+                                         department.name as "Name", 
+                                         department.identifier as "Identifier", 
+                                         department.path as "Path", 
+                                         department.depth as "Depth",
+                                         department.parent_id as "ParentId",
+                                         department.is_active as "IsActive",
+                                         department.created_at as "CreatedAt",
+                                         department.update_at as "UpdatedAt"
                                      from "DirectoryService".department department
                                      where department.path @> @NodePath::ltree
                                        and department.path != @NodePath::ltree

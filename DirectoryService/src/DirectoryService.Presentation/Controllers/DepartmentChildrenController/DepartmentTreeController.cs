@@ -1,6 +1,7 @@
 ﻿using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetAncestorsByPath;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetDirectChildrenByNode;
+using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetNodesByName;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetRootNodeDepartment;
 using DirectoryService.Contract;
 using DirectoryService.Presentation.EndpointResults;
@@ -40,5 +41,16 @@ public class DepartmentTreeController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         return await handler.Handle(path, cancellationToken);
+    }
+    
+    [HttpGet("/departments/tree/search")]
+    public async Task<EndpointResult<List<DepartmentTreeResponse>>> GetNodesBySearch(
+        [FromQuery] string? name,
+        [FromServices] GetNodesByNameHandler handler,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new GetNodesByNameHandlerCommand(name);
+
+        return await handler.Handle(command, cancellationToken);
     }
 }
