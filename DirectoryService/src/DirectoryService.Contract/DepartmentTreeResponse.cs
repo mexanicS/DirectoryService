@@ -1,6 +1,6 @@
 namespace DirectoryService.Contract;
 
-public record DepartmentResponse
+public record DepartmentTreeResponse
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
@@ -11,12 +11,13 @@ public record DepartmentResponse
     public bool IsActive { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
+    public List<DepartmentTreeResponse> Children { get; set; } = [];
 
-    public DepartmentResponse()
+    public DepartmentTreeResponse()
     {
     }
 
-    public DepartmentResponse(
+    public DepartmentTreeResponse(
         Guid id,
         string name,
         string identifier,
@@ -25,7 +26,8 @@ public record DepartmentResponse
         Guid? parentId,
         bool isActive,
         DateTime createdAt,
-        DateTime? updatedAt)
+        DateTime? updatedAt,
+        List<DepartmentTreeResponse>? children = null)
     {
         Id = id;
         Name = name;
@@ -36,5 +38,6 @@ public record DepartmentResponse
         IsActive = isActive;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
+        Children = children ?? [];
     }
 }
