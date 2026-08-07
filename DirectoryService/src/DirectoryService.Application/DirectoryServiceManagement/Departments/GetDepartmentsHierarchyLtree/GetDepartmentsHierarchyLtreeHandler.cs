@@ -15,27 +15,6 @@ public class GetDepartmentsHierarchyLtreeHandler(
         GetDepartmentsHierarchyLtreeQuery query,
         CancellationToken cancellationToken = default)
     {
-        
-        const string testdapper = """
-                                   select id, 
-                                         name, 
-                                         identifier, 
-                                         parent_id, 
-                                         path, 
-                                         depth, 
-                                         is_active, 
-                                         created_at, 
-                                         update_at, 
-                                         soft_deleted_at, 
-                                         is_deleted
-                                  from "DirectoryService".department
-                                  where path <@rootPath::ltree
-                                    and nlevel(path) > nlevel(@rootPath::ltree)
-                                    and nlevel(path) <= nlevel(@rootPath::ltree) + @depth 
-                                    and is_deleted = false
-                                  order by depth
-                                  """;
-        
         const string dapperSql = """
                                     select id, 
                                            name, 
@@ -55,11 +34,12 @@ public class GetDepartmentsHierarchyLtreeHandler(
         
         using var connection = connectionFactory.Create();
 
-        var departmentRows =
-            (await connection.QueryAsync<DepartmentTreeResponse>(dapperSql, new
-            {
-                rootPath = query.RootPath,
-            })).ToList();
+        var command = new CommandDefinition(
+            commandText: dapperSql,
+            parameters: new { rootPath = query.RootPath },
+            cancellationToken: cancellationToken);
+        
+        var departmentRows = (await connection.QueryAsync<DepartmentTreeResponse>(command)).ToList();
 
         var departmentDict = departmentRows.ToDictionary(dr => dr.Id);
 
@@ -79,22 +59,5 @@ public class GetDepartmentsHierarchyLtreeHandler(
 
         return roots;
     }
-
-    //Удаление всех дочерних
-    public async Task<int> DeleteDepartment(GetDepartmentsHierarchyLtreeQuery query)
-    {
-        const string dapperSql = """
-                                    delete from "DirectoryService".department
-                                    where path <@ @rootPath::ltree and path != @rootPath::ltree
-                                """;
-        
-        using var connection = connectionFactory.Create();
-
-        var affectedRows = await connection.ExecuteAsync(dapperSql, new { rootPath = query.RootPath, });
-
-        return affectedRows;
-    }
-    
-
 }
 
