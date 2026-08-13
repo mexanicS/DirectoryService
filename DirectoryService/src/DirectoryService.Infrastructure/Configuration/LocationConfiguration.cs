@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -75,6 +75,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             .HasForeignKey(x => x.LocationId)
             .OnDelete(DeleteBehavior.Cascade);
             
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => x.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_location_name");
     }
 }

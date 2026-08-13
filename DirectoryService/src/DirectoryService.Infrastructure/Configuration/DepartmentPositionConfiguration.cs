@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.DepartmentPositions;
+using DirectoryService.Domain.DepartmentPositions;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +36,11 @@ public class DepartmentPositionConfiguration : IEntityTypeConfiguration<Departme
             .HasConversion(
                 id => id.Value,
                 value => new DepartmentId(value));
+
+        builder.HasIndex(x => x.DepartmentId)
+            .HasDatabaseName("IX_department_positions_department_id");
+
+        builder.HasIndex(x => x.PositionId)
+            .HasDatabaseName("IX_department_positions_position_id");
     }
 }

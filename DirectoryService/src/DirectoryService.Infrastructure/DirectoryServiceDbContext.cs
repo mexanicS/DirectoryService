@@ -39,6 +39,7 @@ public class DirectoryServiceDbContext(string connectionString) : DbContext
         modelBuilder.Entity<Position>().HasQueryFilter(p => !p.IsDeleted);
 
         modelBuilder.HasPostgresExtension("ltree");
+        modelBuilder.HasPostgresExtension("pg_trgm");
     }
     
     private ILoggerFactory CreateLoggerFactory() => 

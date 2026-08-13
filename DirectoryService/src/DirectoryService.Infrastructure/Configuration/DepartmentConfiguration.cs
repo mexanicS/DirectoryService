@@ -89,9 +89,20 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasForeignKey(x => x.DepartmentId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasIndex(x => x.Identifier).IsUnique();
+        builder.HasIndex(x => x.Identifier)
+            .IsUnique()
+            .HasDatabaseName("IX_department_identifier");
+
+        builder.HasIndex(x => x.Path)
+            .HasMethod("gist")
+            .HasDatabaseName("idx_departments_path");
         
-        builder.HasIndex(x => x.Path).HasMethod("gist").HasDatabaseName("idx_departments_path");
-            
+        builder.HasIndex(x => x.ParentId)
+            .HasDatabaseName("IX_department_parent_id");
+        
+        builder.HasIndex(x => x.Name)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops")
+            .HasDatabaseName("idx_departments_name_trgm");
     }
 }
