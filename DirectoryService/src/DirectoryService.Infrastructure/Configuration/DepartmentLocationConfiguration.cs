@@ -1,4 +1,4 @@
-﻿using DirectoryService.Domain.DepartmentLocations;
+using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +36,11 @@ public class DepartmentLocationConfiguration : IEntityTypeConfiguration<Departme
             .HasConversion(
                 id => id.Value,
                 value => new DepartmentId(value));
+        
+        builder.HasIndex(x => x.LocationId)
+            .HasDatabaseName("IX_department_locations_location_id");
+        
+        builder.HasIndex(x => x.DepartmentId)
+            .HasDatabaseName("IX_department_locations_department_id");
     }
 }
