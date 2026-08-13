@@ -1,9 +1,11 @@
 using CSharpFunctionalExtensions;
+using Dapper;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -15,6 +17,81 @@ public class DepartmentRepository(
     : BaseRepository<Department>(context, logger), IDepartmentsRepository
 {
     private readonly DirectoryServiceDbContext _context = context;
+
+    public Task<DepartmentMoveSnapshot?> GetMoveSnapshot(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        return _context.Departments
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(d => d.Id == departmentId)
+            .Select(d => new DepartmentMoveSnapshot(
+                d.Id,
+                d.ParentId,
+                d.Identifier.Value,
+                d.Path.Value,
+                d.Depth.Value,
+                d.IsDeleted,
+                d.UpdatedAt))
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<Result<int, Error>> MoveSubtree(
+        DepartmentId departmentId,
+        DepartmentId? newParentId,
+        string oldPath,
+        string newPath,
+        int depthDelta,
+        DateTime updatedAt,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            const string sql = """
+                UPDATE "DirectoryService".department AS d
+                SET path = CASE
+                        WHEN d.id = @DepartmentId THEN CAST(@NewPath AS ltree)
+                        ELSE CAST(@NewPath AS ltree) || subpath(d.path, nlevel(CAST(@OldPath AS ltree)))
+                    END,
+                    depth = d.depth + @DepthDelta,
+                    parent_id = CASE
+                        WHEN d.id = @DepartmentId THEN @NewParentId
+                        ELSE d.parent_id
+                    END,
+                    update_at = @UpdatedAt
+                WHERE d.path <@ CAST(@OldPath AS ltree)
+                """;
+
+            var parameters = new
+            {
+                DepartmentId = departmentId.Value,
+                NewParentId = newParentId?.Value,
+                OldPath = oldPath,
+                NewPath = newPath,
+                DepthDelta = depthDelta,
+                UpdatedAt = updatedAt
+            };
+
+            var connection = _context.Database.GetDbConnection();
+            var transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+            var command = new CommandDefinition(
+                sql,
+                parameters,
+                transaction,
+                cancellationToken: cancellationToken);
+
+            var affectedRows = await connection.ExecuteAsync(command);
+
+            return affectedRows;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to move department subtree for department id={DepartmentId}",
+                departmentId.Value);
+            return Error.Failure("department.move.failed", "Failed to move department subtree.");
+        }
+    }
 
     public async Task<Result<Guid, Errors>> Add(Department department,
         CancellationToken cancellationToken)
