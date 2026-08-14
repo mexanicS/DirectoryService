@@ -4,7 +4,7 @@ using SharedKernel;
 
 namespace DirectoryService.Application.Database;
 
-public interface ITransactionScope
+public interface ITransactionScope : IDisposable
 {
     UnitResult<Error> Commit();
 

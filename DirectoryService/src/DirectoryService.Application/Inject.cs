@@ -8,6 +8,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Remove
 using DirectoryService.Application.DirectoryServiceManagement.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Move;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetAncestorsByPath;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetDirectChildrenByNode;
@@ -41,6 +42,7 @@ public static class Inject
         
         services.AddScoped<CreateDepartmentHandler>();
         services.AddScoped<UpdateDepartmentHandler>();
+        services.AddScoped<MoveDepartmentHandler>();
         services.AddScoped<DeleteDepartmentHandler>();
         services.AddScoped<SoftDeleteDepartmentHandler>();
         

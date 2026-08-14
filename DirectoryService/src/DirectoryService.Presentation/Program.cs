@@ -5,6 +5,7 @@ using DirectoryService.Presentation.Controllers.DepartmentsController;
 using DirectoryService.Presentation.Controllers.LocationsController;
 using DirectoryService.Presentation.Controllers.PositionsController;
 using DirectoryService.Presentation.Middlewares;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 
@@ -49,7 +50,8 @@ app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService"));
+    //app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService"));
+    app.MapScalarApiReference();
 }
 
 app.MapControllers();

@@ -12,6 +12,24 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments;
 
 public interface IDepartmentsRepository
 {
+    Task<DepartmentMoveSnapshot?> GetMoveSnapshot(DepartmentId departmentId,
+        CancellationToken cancellationToken);
+
+    Task<bool> ExistsActiveSiblingWithIdentifier(
+        DepartmentId? parentId,
+        DepartmentId excludedDepartmentId,
+        string identifier,
+        CancellationToken cancellationToken);
+
+    Task<Result<int, Error>> MoveSubtree(
+        DepartmentId departmentId,
+        DepartmentId? newParentId,
+        string oldPath,
+        string newPath,
+        int depthDelta,
+        DateTime updatedAt,
+        CancellationToken cancellationToken);
+
     Task<Result<Guid, Errors>> Add(Department department, CancellationToken cancellationToken);
 
     Task<Result<Department, Error>> GetById(Guid parentId, CancellationToken cancellationToken);
@@ -52,3 +70,12 @@ public interface IDepartmentsRepository
         DepartmentId departmentId,
         CancellationToken cancellationToken);
 }
+
+public sealed record DepartmentMoveSnapshot(
+    DepartmentId Id,
+    DepartmentId? ParentId,
+    string Identifier,
+    string Path,
+    int Depth,
+    bool IsDeleted,
+    DateTime? UpdatedAt);

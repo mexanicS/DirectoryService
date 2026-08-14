@@ -8,6 +8,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Remove
 using DirectoryService.Application.DirectoryServiceManagement.Departments.SoftDeleteDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLinkDepartmentAndLocationHandler;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
+using DirectoryService.Application.DirectoryServiceManagement.Departments.Move;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Contract;
 using DirectoryService.Presentation.EndpointResults;
@@ -79,6 +80,18 @@ public class DepartmentController : ControllerBase
         var command = new UpdateDepartmentCommand(departmentId, request.Name, request.Identifier);
         
         return await handler.Handle(command, cancellationToken);
+    }
+
+    [HttpPut("/api/departments/{departmentId:guid}/parent")]
+    public async Task<EndpointResult<MoveDepartmentResponse>> MoveDepartment(
+        [FromServices] MoveDepartmentHandler handler,
+        [FromBody] MoveDepartmentRequest request,
+        [FromRoute] Guid departmentId,
+        CancellationToken cancellationToken = default)
+    {
+        return await handler.Handle(
+            new MoveDepartmentCommand(departmentId, request.ParentId),
+            cancellationToken);
     }
     
     [HttpDelete("/api/departments/{departmentId:guid}")]
