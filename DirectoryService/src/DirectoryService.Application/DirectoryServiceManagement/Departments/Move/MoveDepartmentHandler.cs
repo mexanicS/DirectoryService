@@ -1,6 +1,9 @@
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.Database;
+using DirectoryService.Application.Validation;
+using DirectoryService.Contract;
 using DirectoryService.Domain.Departments;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -9,18 +12,20 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Mo
 public sealed class MoveDepartmentHandler(
     IDepartmentsRepository departmentsRepository,
     ITransactionManager transactionManager,
+    IValidator<MoveDepartmentCommand> validator,
     ILogger<MoveDepartmentHandler> logger)
 {
     public async Task<Result<MoveDepartmentResponse, Errors>> Handle(
         MoveDepartmentCommand command,
         CancellationToken cancellationToken)
     {
-        var departmentId = new DepartmentId(command.DepartmentId);
-
-        if (command.ParentId == command.DepartmentId)
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        if (!validationResult.IsValid)
         {
-            return MoveDepartmentErrors.ParentIsSelf().ToErrors();
+            return validationResult.ToErrors();
         }
+
+        var departmentId = new DepartmentId(command.DepartmentId);
 
         var transactionResult = await transactionManager.BeginTransactionAsync(cancellationToken);
         if (transactionResult.IsFailure)
@@ -67,6 +72,17 @@ public sealed class MoveDepartmentHandler(
             {
                 transaction.Rollback();
                 return ToResponse(department);
+            }
+
+            var pathConflictExists = await departmentsRepository.ExistsActiveSiblingWithIdentifier(
+                parent?.Id,
+                department.Id,
+                department.Identifier,
+                cancellationToken);
+            if (pathConflictExists)
+            {
+                transaction.Rollback();
+                return MoveDepartmentErrors.PathConflict().ToErrors();
             }
 
             var newPath = parent is null

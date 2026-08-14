@@ -37,6 +37,40 @@ public class DepartmentRepository(
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<bool> ExistsActiveSiblingWithIdentifier(
+        DepartmentId? parentId,
+        DepartmentId excludedDepartmentId,
+        string identifier,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM "DirectoryService".department AS d
+                WHERE d.parent_id IS NOT DISTINCT FROM @ParentId
+                  AND d.id <> @ExcludedDepartmentId
+                  AND d.identifier = @Identifier
+                  AND d.is_active
+                  AND NOT d.is_deleted
+            )
+            """;
+
+        var connection = _context.Database.GetDbConnection();
+        var transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                ParentId = parentId?.Value,
+                ExcludedDepartmentId = excludedDepartmentId.Value,
+                Identifier = identifier
+            },
+            transaction,
+            cancellationToken: cancellationToken);
+
+        return await connection.ExecuteScalarAsync<bool>(command);
+    }
+
     public async Task<Result<int, Error>> MoveSubtree(
         DepartmentId departmentId,
         DepartmentId? newParentId,

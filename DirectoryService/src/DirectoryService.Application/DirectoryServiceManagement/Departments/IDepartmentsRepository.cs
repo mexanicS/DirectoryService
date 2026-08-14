@@ -15,6 +15,12 @@ public interface IDepartmentsRepository
     Task<DepartmentMoveSnapshot?> GetMoveSnapshot(DepartmentId departmentId,
         CancellationToken cancellationToken);
 
+    Task<bool> ExistsActiveSiblingWithIdentifier(
+        DepartmentId? parentId,
+        DepartmentId excludedDepartmentId,
+        string identifier,
+        CancellationToken cancellationToken);
+
     Task<Result<int, Error>> MoveSubtree(
         DepartmentId departmentId,
         DepartmentId? newParentId,

@@ -1,4 +1,4 @@
-namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Move;
+namespace DirectoryService.Contract;
 
 public sealed record MoveDepartmentResponse(
     Guid Id,
