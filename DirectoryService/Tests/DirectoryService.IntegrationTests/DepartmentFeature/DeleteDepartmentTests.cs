@@ -57,6 +57,35 @@ public class DeleteDepartmentTests : DirectoryBaseTests<DeleteDepartmentHandler>
         Assert.True(result.IsFailure);
     }
 
+    [Fact]
+    public async Task DeleteDepartment_with_children_should_reparent_subtree()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        var (rootId, deletedDepartmentId, childId) = await CreateDepartmentHierarchyInDb();
+
+        // act
+        var result = await ExecuteHandler(sut => sut.Handle(
+            new DeleteDepartmentCommand(deletedDepartmentId.Value),
+            cancellationToken));
+
+        // assert
+        Assert.True(result.IsSuccess);
+
+        await ExecuteContext(async context =>
+        {
+            var deletedDepartmentExists = await context.Departments
+                .AnyAsync(d => d.Id == deletedDepartmentId, cancellationToken);
+            var child = await context.Departments
+                .SingleAsync(d => d.Id == childId, cancellationToken);
+
+            Assert.False(deletedDepartmentExists);
+            Assert.Equal(rootId, child.ParentId);
+            Assert.Equal("root.child", child.Path.Value);
+            Assert.Equal(1, child.Depth.Value);
+        });
+    }
+
     private async Task<DepartmentId> CreateDepartmentInDb(string name, string identifier)
     {
         return await ExecuteContext(async context =>
@@ -80,6 +109,49 @@ public class DeleteDepartmentTests : DirectoryBaseTests<DeleteDepartmentHandler>
 
             await context.SaveChangesAsync();
             return departmentId;
+        });
+    }
+
+    private async Task<(DepartmentId rootId, DepartmentId deletedDepartmentId, DepartmentId childId)>
+        CreateDepartmentHierarchyInDb()
+    {
+        return await ExecuteContext(async context =>
+        {
+            var locationId = new LocationId(Guid.NewGuid());
+            var location = new Location(
+                locationId,
+                LocationName.Create("Tomsk").Value,
+                Address.Create("Tomsk", "Istochnaya", "42", "634000").Value,
+                Timezone.Create("normis").Value);
+            context.Locations.Add(location);
+
+            var rootId = new DepartmentId(Guid.NewGuid());
+            var root = Department.CreateParent(
+                DepartmentName.Create("Root").Value,
+                Identifier.Create("root").Value,
+                [DepartmentLocation.Create(rootId, locationId).Value],
+                rootId).Value;
+
+            var deletedDepartmentId = new DepartmentId(Guid.NewGuid());
+            var deletedDepartment = Department.CreateChild(
+                DepartmentName.Create("Middle").Value,
+                Identifier.Create("middle").Value,
+                root,
+                [DepartmentLocation.Create(deletedDepartmentId, locationId).Value],
+                deletedDepartmentId).Value;
+
+            var childId = new DepartmentId(Guid.NewGuid());
+            var child = Department.CreateChild(
+                DepartmentName.Create("Child").Value,
+                Identifier.Create("child").Value,
+                deletedDepartment,
+                [DepartmentLocation.Create(childId, locationId).Value],
+                childId).Value;
+
+            context.Departments.AddRange(root, deletedDepartment, child);
+            await context.SaveChangesAsync();
+
+            return (rootId, deletedDepartmentId, childId);
         });
     }
 }

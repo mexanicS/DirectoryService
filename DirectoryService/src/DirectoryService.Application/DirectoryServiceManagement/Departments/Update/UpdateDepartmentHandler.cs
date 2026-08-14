@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.Database;
-using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using FluentValidation;
@@ -14,13 +13,10 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Up
 
 public class UpdateDepartmentHandler(
     IDepartmentsRepository departmentsRepository,
-    ILocationsRepository locationsRepository,
     ILogger<UpdateDepartmentHandler> logger,
     IValidator<UpdateDepartmentCommand> validator,
     ITransactionManager transactionManager)
 {
-    private readonly ILocationsRepository _locationsRepository = locationsRepository;
-
     public async Task<Result<Guid, Errors>> Handle(
         UpdateDepartmentCommand updateDepartmentCommand,
         CancellationToken cancellationToken)

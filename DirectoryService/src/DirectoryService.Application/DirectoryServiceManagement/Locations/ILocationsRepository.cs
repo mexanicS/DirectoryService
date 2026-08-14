@@ -13,7 +13,10 @@ public interface ILocationsRepository
     Task<Result<Guid, Error>> AddAsync(Location location, 
         CancellationToken cancellationToken = default);
     
-    Task<Result<bool, Error>> ExistsActiveLocationByAddressAsync(Address address, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> ExistsActiveLocationByAddressAsync(
+        Address address,
+        CancellationToken cancellationToken,
+        LocationId? excludedLocationId = null);
     
     Task<Result<bool, Error>> ExistsActiveLocationById(LocationId locationId, CancellationToken cancellationToken);
     

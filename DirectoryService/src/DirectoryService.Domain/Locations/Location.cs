@@ -26,13 +26,13 @@ public sealed class Location
         CreatedAt = DateTime.UtcNow;
     }
     
-    public LocationId Id { get; private set; }
+    public LocationId Id { get; private set; } = null!;
      
-    public LocationName Name { get; private set; }
+    public LocationName Name { get; private set; } = null!;
     
-    public Address Address { get; private set; }
+    public Address Address { get; private set; } = null!;
 
-    public Timezone Timezone { get; private set; }
+    public Timezone Timezone { get; private set; } = null!;
     
     public bool IsActive { get; private set; }
     

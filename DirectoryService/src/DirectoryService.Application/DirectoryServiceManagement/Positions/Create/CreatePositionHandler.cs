@@ -32,13 +32,6 @@ public class CreatePositionHandler(
             return validationResult.ToErrors();
         }
         
-        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
-        
-        if (transactionScopeResult.IsFailure)
-            return transactionScopeResult.Error.ToErrors();
-
-        var transactionScope = transactionScopeResult.Value;
-        
         var positionId = new PositionId(Guid.NewGuid());
         var positionName = PositionName.Create(createPositionDto.Name).Value;
         var description = Description.Create(createPositionDto.Description).Value;
@@ -56,14 +49,6 @@ public class CreatePositionHandler(
             return locationExists.Error.ToErrors();
         }
 
-        var newPosition = Position.Create(positionId, positionName, description);
-
-        var addPositionResult = await positionsRepository.Add(newPosition.Value, cancellationToken);
-        if (addPositionResult.IsFailure)
-        {
-            return addPositionResult.Error;
-        }
-        
         var departmentsResult = await departmentsRepository
             .GetByIdsWithPositions(departmentIds, cancellationToken);
 
@@ -76,6 +61,22 @@ public class CreatePositionHandler(
         if (missingIds.Any())
         {
             return GeneralErrors.NotFound(missingIds, nameof(Department)).ToErrors();
+        }
+
+        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error.ToErrors();
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
+
+        var newPosition = Position.Create(positionId, positionName, description);
+
+        var addPositionResult = await positionsRepository.Add(newPosition.Value, cancellationToken);
+        if (addPositionResult.IsFailure)
+        {
+            return addPositionResult.Error;
         }
         
         foreach (var department in departmentsResult.Value)

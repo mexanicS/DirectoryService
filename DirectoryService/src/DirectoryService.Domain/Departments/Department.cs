@@ -38,17 +38,17 @@ public sealed class Department
         _departmentLocations = departmentLocations.ToList();
         ParentId = parentId;
     }
-     public DepartmentId Id { get; private set; }
+     public DepartmentId Id { get; private set; } = null!;
      
-     public DepartmentName Name { get; private set; }
+     public DepartmentName Name { get; private set; } = null!;
      
-     public Identifier Identifier { get; private set; }
+     public Identifier Identifier { get; private set; } = null!;
      
      public DepartmentId? ParentId { get; private set; }
      
-     public Path Path { get; private set; }
+     public Path Path { get; private set; } = null!;
      
-     public DepartmentDepth Depth { get; private set; }
+     public DepartmentDepth Depth { get; private set; } = null!;
      
      public bool IsActive { get; private set; }
      
@@ -152,7 +152,7 @@ public sealed class Department
 
          return Result.Success();
      }
-     public void MoveUpInHierarchy(string oldParentPath, string newParentPath, DepartmentId? newParentId)
+     public void ShiftUpAfterParentRemoval(string removedParentPath, string newParentPath)
      {
          var currentDepthValue = Depth.Value;
          if (currentDepthValue > 0)
@@ -160,16 +160,16 @@ public sealed class Department
              Depth = DepartmentDepth.Create(currentDepthValue - 1).Value;
          }
 
-         string currentPathValue = Path.Value;
-         if (currentPathValue.StartsWith(oldParentPath))
+         var currentPathValue = Path.Value;
+         var removedParentPrefix = removedParentPath + '.';
+         if (currentPathValue.StartsWith(removedParentPrefix, StringComparison.Ordinal))
          {
-             string updatedPath = currentPathValue.Replace(oldParentPath, newParentPath);
-             Path = Path.Create(updatedPath).Value;
-         }
+             var relativePath = currentPathValue[removedParentPrefix.Length..];
+             var updatedPath = string.IsNullOrEmpty(newParentPath)
+                 ? relativePath
+                 : $"{newParentPath}.{relativePath}";
 
-         if (ParentId == newParentId) 
-         {
-             ParentId = newParentId; 
+             Path = Path.Create(updatedPath).Value;
          }
         
          UpdatedAt = DateTime.UtcNow;
@@ -188,7 +188,7 @@ public sealed class Department
              return string.Empty;
          }
 
-         var lastDotIndex = Path.Value.LastIndexOf('/');
+         var lastDotIndex = Path.Value.LastIndexOf('.');
          return lastDotIndex == -1 ? string.Empty : Path.Value.Substring(0, lastDotIndex);
      }
      

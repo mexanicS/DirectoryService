@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.Database;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
@@ -17,12 +16,9 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Un
 public class UnLinkDepartmentAndLocationHandler(
     ILocationsRepository locationsRepository,
     IDepartmentsRepository departmentsRepository,
-    ILogger<LinkDepartmentAndLocationHandler> logger,
-    IValidator<DepartmentAndLocationCommand> validator,
-    ITransactionManager transactionManager)
+    ILogger<UnLinkDepartmentAndLocationHandler> logger,
+    IValidator<DepartmentAndLocationCommand> validator)
 {
-    private readonly ITransactionManager _transactionManager = transactionManager;
-
     public async Task<Result<Guid, Errors>> Handle(DepartmentAndLocationCommand departmentAndLocationCommand, 
         CancellationToken cancellationToken)
     {
@@ -46,14 +42,15 @@ public class UnLinkDepartmentAndLocationHandler(
             return departmentExistsResult.Error.ToErrors();
         }
         
-        var linkDepartmentAndLocationResult = await departmentsRepository.ExistsLinkDepartmentAndLocation(departmentId, locationId, cancellationToken);
+        var deletedCount = await departmentsRepository.DeleteDepartmentLocation(
+            departmentId,
+            locationId,
+            cancellationToken);
 
-        if (!linkDepartmentAndLocationResult.Value)
+        if (deletedCount == 0)
         {
             return GeneralErrors.AlreadyExist("Department and Location not linked").ToErrors();
         }
-
-        await departmentsRepository.DeleteLocationsByDepartmentId(departmentId, cancellationToken);
         
         logger.LogInformation("Location with id {locationId} and department with id {departmentId} unlinked", locationId.Value, departmentId.Value);
         

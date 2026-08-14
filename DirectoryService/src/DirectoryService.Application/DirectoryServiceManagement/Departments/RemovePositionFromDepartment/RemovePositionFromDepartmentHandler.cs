@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.Database;
-using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Departments;
 using FluentValidation;
@@ -16,7 +15,7 @@ public class RemovePositionFromDepartmentHandler(
     IDepartmentsRepository departmentsRepository,
     ITransactionManager transactionManager,
     IValidator<RemovePositionFromDepartmentCommand> validator,
-    ILogger<DeleteDepartmentHandler> logger)
+    ILogger<RemovePositionFromDepartmentHandler> logger)
 {
     public async Task<Result<Guid, Errors>> Handle(RemovePositionFromDepartmentCommand command, CancellationToken cancellationToken)
     {

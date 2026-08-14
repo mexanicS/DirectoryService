@@ -25,26 +25,34 @@ public class UpdateLocationHandler(
         {
             return validationResult.ToErrors();
         }
-        
-        var locationCreateResult = CreateLocation(updateLocationCommand);
+
+        var locationId = new LocationId(updateLocationCommand.LocationId);
+        var locationResult = await locationsRepository.GetById(locationId, cancellationToken);
+        if (locationResult.IsFailure)
+        {
+            return locationResult.Error.ToErrors();
+        }
+
+        var locationName = LocationName.Create(updateLocationCommand.LocationName).Value;
+        var address = Address.Create(
+            updateLocationCommand.Address.City,
+            updateLocationCommand.Address.Street,
+            updateLocationCommand.Address.HouseNumber,
+            updateLocationCommand.Address.ZipCode).Value;
+        var timezone = Timezone.Create(updateLocationCommand.Timezone).Value;
         
         var existsByAddress = await locationsRepository
-            .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
+            .ExistsActiveLocationByAddressAsync(
+                address,
+                cancellationToken,
+                locationId);
 
         if (existsByAddress.Value)
         {
             return GeneralErrors.AlreadyExistByAddress().ToErrors();
         }
-        
-        var locationResult = await locationsRepository.GetById(locationCreateResult.Value.Id.Value, cancellationToken);
-        if (locationResult.IsFailure)
-        {
-            return locationResult.Error.ToErrors();
-        }
-        
-        locationResult.Value.UpdateMainInformation(locationCreateResult.Value.Name, 
-            locationCreateResult.Value.Address,  
-            locationCreateResult.Value.Timezone);
+
+        locationResult.Value.UpdateMainInformation(locationName, address, timezone);
         
         var saveResult = await transactionManager.SaveChangesAsync(cancellationToken);
 
@@ -53,30 +61,8 @@ public class UpdateLocationHandler(
             return saveResult.Error.ToErrors();
         }
         
-        logger.LogInformation("Updated location with id {locationId}", locationCreateResult.Value.Id.Value);
+        logger.LogInformation("Updated location with id {LocationId}", locationId.Value);
         
-        return locationCreateResult.Value.Id.Value;
-    }
-    
-    private Result<Location> CreateLocation(UpdateLocationCommand createLocationCommand)
-    {
-        var id = new LocationId(createLocationCommand.LocationId);
-        
-        var locationName = LocationName.Create(createLocationCommand.LocationName);
-        
-        var address = Address.Create(
-            createLocationCommand.Address.City, 
-            createLocationCommand.Address.Street,
-            createLocationCommand.Address.HouseNumber, 
-            createLocationCommand.Address.ZipCode);
-       
-        var timezone = Timezone.Create(createLocationCommand.Timezone);
-        
-        var location = Location.Create(id,
-            locationName.Value,
-            address.Value,
-            timezone.Value);
-        
-        return location.Value;
+        return locationId.Value;
     }
 }

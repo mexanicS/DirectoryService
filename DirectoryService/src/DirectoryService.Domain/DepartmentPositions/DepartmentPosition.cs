@@ -18,11 +18,11 @@ public sealed class DepartmentPosition
         Id = departmentPositionId;
     }
     
-    public DepartmentPositionId Id { get; init; }
+    public DepartmentPositionId Id { get; init; } = null!;
     
-    public DepartmentId  DepartmentId { get; init; }
+    public DepartmentId  DepartmentId { get; init; } = null!;
     
-    public PositionId  PositionId { get; init; }
+    public PositionId  PositionId { get; init; } = null!;
     
     public static Result<DepartmentPosition, Error> Create(DepartmentId departmentId, PositionId positionId)
     {

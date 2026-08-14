@@ -3,6 +3,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.UnLink
 using DirectoryService.Domain.DepartmentLocations;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
+using Microsoft.EntityFrameworkCore;
 
 namespace DirectoryService.IntegrationTests.DepartmentFeature;
 
@@ -52,6 +53,34 @@ public class UnLinkDepartmentAndLocationTests : DirectoryBaseTests<UnLinkDepartm
         Assert.True(result.IsFailure);
     }
 
+    [Fact]
+    public async Task UnLinkDepartmentAndLocation_should_keep_other_department_locations()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        var (departmentId, removedLocationId, remainingLocationId) =
+            await CreateDepartmentWithTwoLocations();
+
+        // act
+        var result = await ExecuteHandler(sut => sut.Handle(
+            new DepartmentAndLocationCommand(departmentId.Value, removedLocationId.Value),
+            cancellationToken));
+
+        // assert
+        Assert.True(result.IsSuccess);
+
+        await ExecuteContext(async context =>
+        {
+            var locationIds = await context.DepartmentLocations
+                .Where(dl => dl.DepartmentId == departmentId)
+                .Select(dl => dl.LocationId)
+                .ToListAsync(cancellationToken);
+
+            Assert.Single(locationIds);
+            Assert.Equal(remainingLocationId, locationIds[0]);
+        });
+    }
+
     private async Task<(DepartmentId departmentId, LocationId locationId)> CreateLinkedDepartmentAndLocation()
     {
         return await ExecuteContext(async context =>
@@ -75,6 +104,44 @@ public class UnLinkDepartmentAndLocationTests : DirectoryBaseTests<UnLinkDepartm
 
             await context.SaveChangesAsync();
             return (departmentId, locationId);
+        });
+    }
+
+    private async Task<(DepartmentId departmentId, LocationId removedLocationId, LocationId remainingLocationId)>
+        CreateDepartmentWithTwoLocations()
+    {
+        return await ExecuteContext(async context =>
+        {
+            var removedLocationId = new LocationId(Guid.NewGuid());
+            var removedLocation = new Location(
+                removedLocationId,
+                LocationName.Create("Tomsk").Value,
+                Address.Create("Tomsk", "Istochnaya", "42", "634000").Value,
+                Timezone.Create("normis").Value);
+
+            var remainingLocationId = new LocationId(Guid.NewGuid());
+            var remainingLocation = new Location(
+                remainingLocationId,
+                LocationName.Create("Novosibirsk").Value,
+                Address.Create("Novosibirsk", "Lenina", "1", "630000").Value,
+                Timezone.Create("normis").Value);
+
+            context.Locations.AddRange(removedLocation, remainingLocation);
+
+            var departmentId = new DepartmentId(Guid.NewGuid());
+            var department = Department.CreateParent(
+                DepartmentName.Create("Logistics").Value,
+                Identifier.Create("logistics").Value,
+                [
+                    DepartmentLocation.Create(departmentId, removedLocationId).Value,
+                    DepartmentLocation.Create(departmentId, remainingLocationId).Value,
+                ],
+                departmentId).Value;
+
+            context.Departments.Add(department);
+            await context.SaveChangesAsync();
+
+            return (departmentId, removedLocationId, remainingLocationId);
         });
     }
 

@@ -217,10 +217,22 @@ public class DepartmentRepository(
         return department;
     }
 
-    public async Task DeleteLocationsByDepartmentId(Guid id, CancellationToken cancellationToken)
+    public Task<int> DeleteDepartmentLocations(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
     {
-        await _context.DepartmentLocations
-            .Where(dl => dl.DepartmentId == id)
+        return _context.DepartmentLocations
+            .Where(dl => dl.DepartmentId == departmentId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public Task<int> DeleteDepartmentLocation(
+        DepartmentId departmentId,
+        LocationId locationId,
+        CancellationToken cancellationToken)
+    {
+        return _context.DepartmentLocations
+            .Where(dl => dl.DepartmentId == departmentId && dl.LocationId == locationId)
             .ExecuteDeleteAsync(cancellationToken);
     }
 

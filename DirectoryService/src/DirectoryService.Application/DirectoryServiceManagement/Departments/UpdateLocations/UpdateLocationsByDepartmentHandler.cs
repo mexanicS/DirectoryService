@@ -30,13 +30,6 @@ public class UpdateLocationsByDepartmentHandler(
             return validationResult.ToErrors();
         }
         
-        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
-        
-        if (transactionScopeResult.IsFailure)
-            return transactionScopeResult.Error.ToErrors();
-
-        var transactionScope = transactionScopeResult.Value;
-        
         var department = await departmentsRepository.GetById(updateDepartmentCommand.DepartmentId, cancellationToken);
         if (department.IsFailure)
         {
@@ -52,8 +45,16 @@ public class UpdateLocationsByDepartmentHandler(
         var departmentLocations = locationExists.Value
             .Select(location => DepartmentLocation.Create(department.Value.Id, location.Id))
             .ToList();
+
+        var transactionScopeResult = await transactionManager.BeginTransactionAsync(cancellationToken);
+        if (transactionScopeResult.IsFailure)
+        {
+            return transactionScopeResult.Error.ToErrors();
+        }
+
+        using var transactionScope = transactionScopeResult.Value;
         
-        await departmentsRepository.DeleteLocationsByDepartmentId(department.Value.Id, cancellationToken);
+        await departmentsRepository.DeleteDepartmentLocations(department.Value.Id, cancellationToken);
 
         await departmentsRepository.AddDepartmentLocations(departmentLocations.Select(result => result.Value), cancellationToken);
         

@@ -35,7 +35,7 @@ public class DeleteDepartmentHandler(
                 return transactionScopeResult.Error.ToErrors();
             }
 
-            var transactionScope = transactionScopeResult.Value;
+            using var transactionScope = transactionScopeResult.Value;
 
             try
             {
@@ -59,7 +59,7 @@ public class DeleteDepartmentHandler(
                         child.UpdateParent(targetDepartment.ParentId);
                     }
 
-                    child.MoveUpInHierarchy(oldPathPrefix, newPathPrefix, targetDepartment.ParentId);
+                    child.ShiftUpAfterParentRemoval(oldPathPrefix, newPathPrefix);
                 }
 
                 departmentsRepository.Delete(targetDepartment);

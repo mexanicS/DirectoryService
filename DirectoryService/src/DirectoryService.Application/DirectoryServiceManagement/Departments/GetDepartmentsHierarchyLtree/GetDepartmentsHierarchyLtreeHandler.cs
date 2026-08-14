@@ -2,14 +2,11 @@
 using Dapper;
 using DirectoryService.Application.Database;
 using DirectoryService.Contract;
-using FluentValidation;
 using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Departments.GetDepartmentsHierarchyLtree;
 
-public class GetDepartmentsHierarchyLtreeHandler(
-    ISqlConnectionFactory connectionFactory,
-    IValidator<GetDepartmentsHierarchyLtreeQuery> validator)
+public class GetDepartmentsHierarchyLtreeHandler(ISqlConnectionFactory connectionFactory)
 {
     public async Task<Result<List<DepartmentTreeResponse>, Errors>> Handle(
         GetDepartmentsHierarchyLtreeQuery query,

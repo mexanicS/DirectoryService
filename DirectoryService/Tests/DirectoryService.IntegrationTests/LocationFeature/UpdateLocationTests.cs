@@ -41,6 +41,29 @@ public class UpdateLocationTests : DirectoryBaseTests<UpdateLocationHandler>
     }
 
     [Fact]
+    public async Task UpdateLocation_with_unchanged_address_should_succeed()
+    {
+        // arrange
+        var cancellationToken = CancellationToken.None;
+        var locationId = await CreateLocationInDb("Old Name", "Tomsk");
+        var addressDto = new AddressDto("Tomsk", "Istochnaya", "42", "634000");
+        var command = new UpdateLocationCommand(locationId.Value, "New Name", addressDto, "normis");
+
+        // act
+        var result = await ExecuteHandler(sut => sut.Handle(command, cancellationToken));
+
+        // assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(locationId.Value, result.Value);
+
+        await ExecuteContext(async context =>
+        {
+            var location = await context.Locations.SingleAsync(l => l.Id == locationId, cancellationToken);
+            Assert.Equal("New Name", location.Name.Value);
+        });
+    }
+
+    [Fact]
     public async Task UpdateLocation_with_nonexistent_id_should_fail()
     {
         // arrange
@@ -63,7 +86,7 @@ public class UpdateLocationTests : DirectoryBaseTests<UpdateLocationHandler>
             var location = new Location(
                 locationId,
                 LocationName.Create(name).Value,
-                Address.Create(city, "Istochnaya", Guid.NewGuid().ToString().Substring(0, 4), "634000").Value,
+                Address.Create(city, "Istochnaya", "42", "634000").Value,
                 Timezone.Create("normis").Value);
             context.Locations.Add(location);
             await context.SaveChangesAsync();

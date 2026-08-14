@@ -44,7 +44,12 @@ public interface IDepartmentsRepository
     Task<Result<Department, Error>> GetByIdWithLocations(DepartmentId id,
         CancellationToken cancellationToken);
 
-    Task DeleteLocationsByDepartmentId(Guid id, CancellationToken cancellationToken);
+    Task<int> DeleteDepartmentLocations(DepartmentId departmentId, CancellationToken cancellationToken);
+
+    Task<int> DeleteDepartmentLocation(
+        DepartmentId departmentId,
+        LocationId locationId,
+        CancellationToken cancellationToken);
 
     Task AddDepartmentLocations(IEnumerable<DepartmentLocation> departmentLocations,
         CancellationToken cancellationToken);

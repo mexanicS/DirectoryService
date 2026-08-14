@@ -23,11 +23,11 @@ public sealed class Position
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
-    public PositionId Id { get; set; }
+    public PositionId Id { get; set; } = null!;
      
-    public PositionName Name { get; set; }
+    public PositionName Name { get; set; } = null!;
     
-    public Description Description { get; set; }
+    public Description Description { get; set; } = null!;
 
     public bool IsActive { get; set; }
     
