@@ -1,3 +1,4 @@
+using System.Data.Common;
 using CSharpFunctionalExtensions;
 using Dapper;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
@@ -18,23 +19,45 @@ public class DepartmentRepository(
 {
     private readonly DirectoryServiceDbContext _context = context;
 
-    public Task<DepartmentMoveSnapshot?> GetMoveSnapshot(
-        DepartmentId departmentId,
+    public async Task<IReadOnlyList<DepartmentMoveSnapshot>> LockMoveSnapshots(
+        IReadOnlyCollection<DepartmentId> departmentIds,
         CancellationToken cancellationToken)
     {
-        return _context.Departments
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(d => d.Id == departmentId)
-            .Select(d => new DepartmentMoveSnapshot(
-                d.Id,
-                d.ParentId,
-                d.Identifier.Value,
-                d.Path.Value,
-                d.Depth.Value,
-                d.IsDeleted,
-                d.UpdatedAt))
-            .SingleOrDefaultAsync(cancellationToken);
+        const string sql = """
+            SELECT d.id AS "Id",
+                   d.parent_id AS "ParentId",
+                   d.identifier AS "Identifier",
+                   d.path::text AS "Path",
+                   d.depth AS "Depth",
+                   d.is_deleted AS "IsDeleted",
+                   d.update_at AS "UpdatedAt"
+            FROM "DirectoryService".department AS d
+            WHERE d.id = ANY(@DepartmentIds)
+            ORDER BY d.id ASC
+            FOR UPDATE OF d
+            """;
+
+        var connection = _context.Database.GetDbConnection();
+        var transaction = _context.Database.CurrentTransaction?.GetDbTransaction()
+            ?? throw new InvalidOperationException("Department move locks require an active transaction.");
+        var command = new CommandDefinition(
+            sql,
+            new { DepartmentIds = departmentIds.Select(id => id.Value).Distinct().ToArray() },
+            transaction,
+            cancellationToken: cancellationToken);
+
+        var rows = await connection.QueryAsync<DepartmentMoveSnapshotRow>(command);
+
+        return rows
+            .Select(row => new DepartmentMoveSnapshot(
+                new DepartmentId(row.Id),
+                row.ParentId is { } parentId ? new DepartmentId(parentId) : null,
+                row.Identifier,
+                row.Path,
+                row.Depth,
+                row.IsDeleted,
+                row.UpdatedAt))
+            .ToList();
     }
 
     public async Task<bool> ExistsActiveSiblingWithIdentifier(
@@ -43,32 +66,18 @@ public class DepartmentRepository(
         string identifier,
         CancellationToken cancellationToken)
     {
-        const string sql = """
-            SELECT EXISTS (
-                SELECT 1
-                FROM "DirectoryService".department AS d
-                WHERE d.parent_id IS NOT DISTINCT FROM @ParentId
-                  AND d.id <> @ExcludedDepartmentId
-                  AND d.identifier = @Identifier
-                  AND d.is_active
-                  AND NOT d.is_deleted
-            )
-            """;
+        var departmentIdentifier = Identifier.Create(identifier).Value;
 
-        var connection = _context.Database.GetDbConnection();
-        var transaction = _context.Database.CurrentTransaction?.GetDbTransaction();
-        var command = new CommandDefinition(
-            sql,
-            new
-            {
-                ParentId = parentId?.Value,
-                ExcludedDepartmentId = excludedDepartmentId.Value,
-                Identifier = identifier
-            },
-            transaction,
-            cancellationToken: cancellationToken);
-
-        return await connection.ExecuteScalarAsync<bool>(command);
+        return await _context.Departments
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                department =>
+                    department.ParentId == parentId &&
+                    department.Id != excludedDepartmentId &&
+                    department.Identifier == departmentIdentifier &&
+                    department.IsActive &&
+                    !department.IsDeleted,
+                cancellationToken);
     }
 
     public async Task<Result<int, Error>> MoveSubtree(
@@ -118,6 +127,10 @@ public class DepartmentRepository(
             var affectedRows = await connection.ExecuteAsync(command);
 
             return affectedRows;
+        }
+        catch (Exception ex) when (IsTransactionConflict(ex))
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -224,6 +237,37 @@ public class DepartmentRepository(
         return _context.DepartmentLocations
             .Where(dl => dl.DepartmentId == departmentId)
             .ExecuteDeleteAsync(cancellationToken);
+    }
+
+    private static bool IsTransactionConflict(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is DbException { SqlState: { } sqlState } &&
+                (sqlState.StartsWith("40", StringComparison.Ordinal) || sqlState == "55P03"))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private sealed class DepartmentMoveSnapshotRow
+    {
+        public Guid Id { get; set; }
+
+        public Guid? ParentId { get; set; }
+
+        public string Identifier { get; set; } = string.Empty;
+
+        public string Path { get; set; } = string.Empty;
+
+        public int Depth { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public Task<int> DeleteDepartmentLocation(

@@ -1,3 +1,5 @@
+using System.Data;
+using System.Data.Common;
 using CSharpFunctionalExtensions;
 using DirectoryService.Application.Database;
 using DirectoryService.Application.Validation;
@@ -27,7 +29,8 @@ public sealed class MoveDepartmentHandler(
 
         var departmentId = new DepartmentId(command.DepartmentId);
 
-        var transactionResult = await transactionManager.BeginTransactionAsync(cancellationToken);
+        var transactionResult = await transactionManager.BeginTransactionAsync(
+            cancellationToken);
         if (transactionResult.IsFailure)
         {
             return transactionResult.Error.ToErrors();
@@ -37,7 +40,19 @@ public sealed class MoveDepartmentHandler(
 
         try
         {
-            var department = await departmentsRepository.GetMoveSnapshot(departmentId, cancellationToken);
+            var lockIds = command.ParentId is { } parentId
+                ? new[] { departmentId, new DepartmentId(parentId) }
+                : [departmentId];
+
+            var lockedDepartments = await departmentsRepository.LockMoveSnapshots(lockIds, cancellationToken);
+            var department = lockedDepartments.SingleOrDefault(d => d.Id == departmentId);
+
+            if (command.ParentId == command.DepartmentId)
+            {
+                transaction.Rollback();
+                return MoveDepartmentErrors.ParentIsSelf().ToErrors();
+            }
+
             if (department is null || department.IsDeleted)
             {
                 transaction.Rollback();
@@ -47,7 +62,7 @@ public sealed class MoveDepartmentHandler(
             DepartmentMoveSnapshot? parent = null;
             if (command.ParentId is { } parentGuid)
             {
-                parent = await departmentsRepository.GetMoveSnapshot(new DepartmentId(parentGuid), cancellationToken);
+                parent = lockedDepartments.SingleOrDefault(d => d.Id.Value == parentGuid);
                 if (parent is null)
                 {
                     transaction.Rollback();
@@ -117,7 +132,9 @@ public sealed class MoveDepartmentHandler(
             if (commitResult.IsFailure)
             {
                 transaction.Rollback();
-                return commitResult.Error.ToErrors();
+                return commitResult.Error.Type == ErrorType.CONFLICT
+                    ? MoveDepartmentErrors.TransactionConflict().ToErrors()
+                    : commitResult.Error.ToErrors();
             }
 
             logger.LogInformation("Department id={DepartmentId} moved to parent id={ParentId}",
@@ -130,6 +147,14 @@ public sealed class MoveDepartmentHandler(
                 newDepth,
                 updatedAt);
         }
+        catch (Exception ex) when (IsTransactionConflict(ex))
+        {
+            logger.LogWarning(ex,
+                "Concurrent department move conflict for department id={DepartmentId}",
+                command.DepartmentId);
+            transaction.Rollback();
+            return MoveDepartmentErrors.TransactionConflict().ToErrors();
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to move department id={DepartmentId}", command.DepartmentId);
@@ -140,6 +165,20 @@ public sealed class MoveDepartmentHandler(
 
     private static bool IsSameOrDescendant(string candidatePath, string subtreePath) =>
         candidatePath == subtreePath || candidatePath.StartsWith(subtreePath + '.', StringComparison.Ordinal);
+
+    private static bool IsTransactionConflict(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is DbException { SqlState: { } sqlState } &&
+                (sqlState.StartsWith("40", StringComparison.Ordinal) || sqlState == "55P03"))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static MoveDepartmentResponse ToResponse(DepartmentMoveSnapshot department) =>
         new(

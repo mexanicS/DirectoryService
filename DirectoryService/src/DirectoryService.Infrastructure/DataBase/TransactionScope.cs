@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using CSharpFunctionalExtensions;
 
 using DirectoryService.Application.Database;
@@ -18,6 +19,14 @@ public class TransactionScope(IDbTransaction transaction, ILogger<TransactionSco
             transaction.Commit();
 
             return UnitResult.Success<Error>();
+        }
+        catch (Exception e) when (IsTransactionConflict(e))
+        {
+            const string message = "Transaction conflicted with another database transaction.";
+
+            logger.LogWarning(e, message);
+
+            return Error.Conflict("transaction.conflict", message);
         }
         catch (Exception e)
         {
@@ -50,5 +59,19 @@ public class TransactionScope(IDbTransaction transaction, ILogger<TransactionSco
     public void Dispose()
     {
         transaction.Dispose();
+    }
+
+    private static bool IsTransactionConflict(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is DbException { SqlState: { } sqlState } &&
+                (sqlState.StartsWith("40", StringComparison.Ordinal) || sqlState == "55P03"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

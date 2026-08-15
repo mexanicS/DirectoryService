@@ -12,7 +12,8 @@ namespace DirectoryService.Application.DirectoryServiceManagement.Departments;
 
 public interface IDepartmentsRepository
 {
-    Task<DepartmentMoveSnapshot?> GetMoveSnapshot(DepartmentId departmentId,
+    Task<IReadOnlyList<DepartmentMoveSnapshot>> LockMoveSnapshots(
+        IReadOnlyCollection<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
     Task<bool> ExistsActiveSiblingWithIdentifier(
