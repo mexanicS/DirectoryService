@@ -156,6 +156,67 @@ public class MoveDepartmentTests : DirectoryBaseTests<MoveDepartmentHandler>
         });
     }
 
+    [Fact]
+    public async Task Concurrent_moves_of_same_department_should_keep_tree_consistent()
+    {
+        var tree = await CreateTree();
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var moveToHq = Task.Run(async () =>
+        {
+            await start.Task;
+            return await Move(tree.Team.Id.Value, tree.Hq.Id.Value);
+        });
+        var moveToOtherRoot = Task.Run(async () =>
+        {
+            await start.Task;
+            return await Move(tree.Team.Id.Value, tree.OtherRoot.Id.Value);
+        });
+
+        start.SetResult(true);
+        var results = await Task.WhenAll(moveToHq, moveToOtherRoot);
+
+        Assert.Contains(results, result => result.IsSuccess);
+        Assert.All(results.Where(result => result.IsFailure), result =>
+            AssertError(result, "department.move.conflict"));
+
+        await ExecuteContext(async context =>
+        {
+            var team = await context.Departments
+                .AsNoTracking()
+                .SingleAsync(d => d.Id == tree.Team.Id);
+            Assert.True(team.ParentId == tree.Hq.Id || team.ParentId == tree.OtherRoot.Id);
+        });
+        await AssertTreeConsistent();
+    }
+
+    [Fact]
+    public async Task Reciprocal_concurrent_moves_should_reject_one_with_cycle_and_keep_tree_consistent()
+    {
+        var tree = await CreateTree();
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var moveHqUnderBranch = Task.Run(async () =>
+        {
+            await start.Task;
+            return await Move(tree.Hq.Id.Value, tree.OtherRoot.Id.Value);
+        });
+        var moveBranchUnderHq = Task.Run(async () =>
+        {
+            await start.Task;
+            return await Move(tree.OtherRoot.Id.Value, tree.Hq.Id.Value);
+        });
+
+        start.SetResult(true);
+        var results = await Task.WhenAll(moveHqUnderBranch, moveBranchUnderHq);
+
+        Assert.Single(results, result => result.IsSuccess);
+        var rejectedMove = Assert.Single(results, result => result.IsFailure);
+        AssertError(rejectedMove, "department.move.cycle");
+        Assert.Equal(SharedKernel.ErrorType.CONFLICT, rejectedMove.Error.Single().Type);
+        await AssertTreeConsistent();
+    }
+
     private Task<CSharpFunctionalExtensions.Result<MoveDepartmentResponse, SharedKernel.Errors>> Move(
         Guid departmentId,
         Guid? parentId) =>
@@ -169,6 +230,42 @@ public class MoveDepartmentTests : DirectoryBaseTests<MoveDepartmentHandler>
     {
         Assert.True(result.IsFailure);
         Assert.Equal(code, result.Error.Single().Code);
+    }
+
+    private async Task AssertTreeConsistent()
+    {
+        var departments = await ExecuteContext(context => context.Departments
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .ToListAsync());
+        var departmentsById = departments.ToDictionary(department => department.Id.Value);
+
+        foreach (var department in departments)
+        {
+            var identifiers = new List<string>();
+            var visited = new HashSet<Guid>();
+            var current = department;
+
+            while (true)
+            {
+                Assert.True(visited.Add(current.Id.Value),
+                    $"Cycle detected from department '{department.Id.Value}'.");
+                identifiers.Add(current.Identifier.Value);
+
+                if (current.ParentId is null)
+                {
+                    break;
+                }
+
+                Assert.True(departmentsById.TryGetValue(current.ParentId.Value, out var parent),
+                    $"Parent '{current.ParentId.Value}' was not found.");
+                current = parent!;
+            }
+
+            identifiers.Reverse();
+            Assert.Equal(string.Join('.', identifiers), department.Path.Value);
+            Assert.Equal(identifiers.Count - 1, department.Depth.Value);
+        }
     }
 
     private async Task<Tree> CreateTree(int extraDescendants = 0)
