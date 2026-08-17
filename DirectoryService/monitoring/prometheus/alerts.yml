@@ -1,0 +1,46 @@
+groups:
+  - name: directory-service
+    rules:
+      - alert: DirectoryServiceDown
+        expr: up{job="directory-service"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: DirectoryService is unavailable
+          description: Prometheus has been unable to scrape DirectoryService for more than two minutes.
+
+      - alert: DirectoryServiceHighErrorRate
+        expr: |
+          sum(rate(http_server_request_duration_seconds_count{job="directory-service", http_response_status_code=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_server_request_duration_seconds_count{job="directory-service"}[5m])), 0.001)
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: DirectoryService has a high HTTP 5xx error rate
+          description: More than 5% of HTTP requests have returned 5xx responses for five minutes.
+
+      - alert: DirectoryServiceHighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(http_server_request_duration_seconds_bucket{job="directory-service"}[5m]))
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: DirectoryService p95 latency is high
+          description: The p95 HTTP request duration has exceeded 500 ms for ten minutes.
+
+      - alert: DirectoryServiceSoftDeletePurgeStale
+        expr: time() - directory_service_soft_delete_purge_last_success_time_seconds{job="directory-service"} > 180
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: DirectoryService soft-delete purge is stale
+          description: The background purge has not completed successfully within the expected interval.

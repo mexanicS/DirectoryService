@@ -5,6 +5,7 @@ using DirectoryService.Presentation.Controllers.DepartmentsController;
 using DirectoryService.Presentation.Controllers.LocationsController;
 using DirectoryService.Presentation.Controllers.PositionsController;
 using DirectoryService.Presentation.Middlewares;
+using DirectoryService.Presentation.Observability;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
@@ -37,6 +38,8 @@ builder.Services
     .AddSpeciesApplication()
     .AddSerilog();
 
+builder.Services.AddDirectoryServiceObservability(builder.Environment);
+
 builder.Services.AddHttpLogging(o =>
 {
     o.CombineLogs = true;
@@ -55,6 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+app.MapDirectoryServiceMetrics();
 
 app.Run();
 

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using DirectoryService.Application.Database;
 using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
@@ -5,6 +7,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Positions;
 using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
+using DirectoryService.Infrastructure.Observability;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,7 +18,8 @@ namespace DirectoryService.Infrastructure.BackgroundServices;
 public class SoftDeletePurgeBackgroundService(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
-    ILogger<SoftDeletePurgeBackgroundService> logger)
+    ILogger<SoftDeletePurgeBackgroundService> logger,
+    DirectoryServiceMetrics metrics)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -41,6 +45,22 @@ public class SoftDeletePurgeBackgroundService(
     }
     
     public async Task PurgeAllDeletedRecordsAsync(CancellationToken cancellationToken)
+    {
+        var startedAt = Stopwatch.GetTimestamp();
+
+        try
+        {
+            await PurgeAllDeletedRecordsCoreAsync(cancellationToken);
+            metrics.RecordPurgeRun(Stopwatch.GetElapsedTime(startedAt), isSuccess: true);
+        }
+        catch
+        {
+            metrics.RecordPurgeRun(Stopwatch.GetElapsedTime(startedAt), isSuccess: false);
+            throw;
+        }
+    }
+
+    private async Task PurgeAllDeletedRecordsCoreAsync(CancellationToken cancellationToken)
     {
         var expirationDays = configuration.GetValue("SoftDeletePurge:ExpirationDays", 30);
         var batchSize = configuration.GetValue("SoftDeletePurge:BatchSize", 1000);
@@ -113,6 +133,7 @@ public class SoftDeletePurgeBackgroundService(
 
         if (totalDeleted > 0)
         {
+            metrics.RecordPurgedRecords(entityName, totalDeleted);
             logger.LogInformation("Purged {Count} soft-deleted {EntityName}.", totalDeleted, entityName);
         }
     }

@@ -3,6 +3,7 @@ using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using DirectoryService.Domain.Positions;
 using DirectoryService.Infrastructure.BackgroundServices;
+using DirectoryService.Infrastructure.Observability;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +56,8 @@ public class SoftDeletePurgeBackgroundServiceTests : IClassFixture<DirectoryTest
         var service = new SoftDeletePurgeBackgroundService(
             Services.GetRequiredService<IServiceScopeFactory>(),
             Services.GetRequiredService<IConfiguration>(),
-            Services.GetRequiredService<ILogger<SoftDeletePurgeBackgroundService>>()
+            Services.GetRequiredService<ILogger<SoftDeletePurgeBackgroundService>>(),
+            Services.GetRequiredService<DirectoryServiceMetrics>()
         );
 
         // act
@@ -96,7 +98,8 @@ public class SoftDeletePurgeBackgroundServiceTests : IClassFixture<DirectoryTest
         var service = new SoftDeletePurgeBackgroundService(
             Services.GetRequiredService<IServiceScopeFactory>(),
             Services.GetRequiredService<IConfiguration>(),
-            Services.GetRequiredService<ILogger<SoftDeletePurgeBackgroundService>>()
+            Services.GetRequiredService<ILogger<SoftDeletePurgeBackgroundService>>(),
+            Services.GetRequiredService<DirectoryServiceMetrics>()
         );
 
         // act

@@ -23,6 +23,8 @@ public class DirectoryTestWebFactory : WebApplicationFactory<Presentation.Progra
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting("Observability:Prometheus:EndpointEnabled", "true");
+
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<DirectoryServiceDbContext>();

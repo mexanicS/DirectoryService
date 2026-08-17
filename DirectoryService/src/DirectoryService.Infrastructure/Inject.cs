@@ -3,6 +3,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.DirectoryServiceManagement.Positions;
 using DirectoryService.Infrastructure.DataBase;
+using DirectoryService.Infrastructure.Observability;
 using DirectoryService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ public static class Inject
             .AddRepositories();
 
         services.AddHostedService<BackgroundServices.SoftDeletePurgeBackgroundService>();
+        services.AddSingleton<DirectoryServiceMetrics>();
         
         return services;
     }
