@@ -1,7 +1,9 @@
-﻿using System.Net;
+using Microsoft.AspNetCore.Http;
+using System.Net;
+using Shared.Framework;
 using SharedKernel;
 
-namespace DirectoryService.Presentation.EndpointResults;
+namespace Shared.Framework.EndpointResults;
 
 public sealed class SuccessResult<TValue>(TValue value) : IResult
 {

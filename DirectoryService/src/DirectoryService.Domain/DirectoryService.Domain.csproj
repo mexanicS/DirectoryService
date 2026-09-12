@@ -7,6 +7,6 @@
     </PropertyGroup>
   
     <ItemGroup>
-      <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
+      <PackageReference Include="MexanicS.SharedKernel" Version="0.1.0" />
     </ItemGroup>
 </Project>

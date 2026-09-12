@@ -2,7 +2,7 @@ using CSharpFunctionalExtensions;
 
 using SharedKernel;
 
-namespace DirectoryService.Application.Database;
+namespace Shared.Core.Transactions;
 
 public interface ITransactionScope : IDisposable
 {

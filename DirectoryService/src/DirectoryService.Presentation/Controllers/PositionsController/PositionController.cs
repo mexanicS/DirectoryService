@@ -2,7 +2,7 @@ using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Delete;
 using DirectoryService.Application.DirectoryServiceManagement.Positions.Update;
-using DirectoryService.Presentation.EndpointResults;
+using Shared.Framework.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
 

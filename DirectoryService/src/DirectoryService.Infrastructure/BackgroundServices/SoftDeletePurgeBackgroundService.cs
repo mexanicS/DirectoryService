@@ -1,3 +1,4 @@
+using Shared.Core.Transactions;
 using System.Diagnostics;
 
 using DirectoryService.Application.Database;

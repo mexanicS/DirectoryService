@@ -1,3 +1,4 @@
+using SharedKernel;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.UpdateLocations;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Create;
@@ -7,7 +8,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Locations.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.GetTop;
 using DirectoryService.Application.DirectoryServiceManagement.Locations.Update;
 using DirectoryService.Contract;
-using DirectoryService.Presentation.EndpointResults;
+using Shared.Framework.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -31,7 +31,7 @@ public class CreateLocationHandler(
             .ExistsActiveLocationByAddressAsync(locationCreateResult.Value.Address, cancellationToken);
         
         if (existsByAddress.Value)
-            return GeneralErrors.AlreadyExistByAddress().ToErrors();
+            return DirectoryErrors.AlreadyExistByAddress().ToErrors();
 
         var addAsync = await locationsRepository.AddAsync(locationCreateResult.Value, cancellationToken);
         

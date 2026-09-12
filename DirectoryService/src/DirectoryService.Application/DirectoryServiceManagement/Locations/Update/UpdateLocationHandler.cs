@@ -1,4 +1,5 @@
-﻿using System;
+using Shared.Core.Transactions;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -49,7 +50,7 @@ public class UpdateLocationHandler(
 
         if (existsByAddress.Value)
         {
-            return GeneralErrors.AlreadyExistByAddress().ToErrors();
+            return DirectoryErrors.AlreadyExistByAddress().ToErrors();
         }
 
         locationResult.Value.UpdateMainInformation(locationName, address, timezone);

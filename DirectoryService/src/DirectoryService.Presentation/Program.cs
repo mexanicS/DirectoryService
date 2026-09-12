@@ -4,7 +4,7 @@ using DirectoryService.Presentation.Controllers.DepartmentChildrenController;
 using DirectoryService.Presentation.Controllers.DepartmentsController;
 using DirectoryService.Presentation.Controllers.LocationsController;
 using DirectoryService.Presentation.Controllers.PositionsController;
-using DirectoryService.Presentation.Middlewares;
+using Shared.Framework.Middlewares;
 using DirectoryService.Presentation.Observability;
 using Scalar.AspNetCore;
 using Serilog;

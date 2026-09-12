@@ -1,10 +1,13 @@
-﻿using System.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Builder;
+using System.Reflection;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Http.Metadata;
+using Shared.Framework;
 using SharedKernel;
 using IResult = Microsoft.AspNetCore.Http.IResult;
 
-namespace DirectoryService.Presentation.EndpointResults;
+namespace Shared.Framework.EndpointResults;
 
 public sealed class EndpointResult<TValue> : IResult, IEndpointMetadataProvider
 {

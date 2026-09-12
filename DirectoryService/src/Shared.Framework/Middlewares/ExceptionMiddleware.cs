@@ -1,6 +1,10 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Builder;
+using Shared.Framework;
 using SharedKernel;
 
-namespace DirectoryService.Presentation.Middlewares;
+namespace Shared.Framework.Middlewares;
 
 public class ExceptionMiddleware(
     RequestDelegate next,

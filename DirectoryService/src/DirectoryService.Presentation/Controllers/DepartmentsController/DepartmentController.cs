@@ -1,3 +1,4 @@
+using SharedKernel;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.AddPositionToDepartment;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Create;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Delete;
@@ -11,7 +12,7 @@ using DirectoryService.Application.DirectoryServiceManagement.Departments.Update
 using DirectoryService.Application.DirectoryServiceManagement.Departments.Move;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 using DirectoryService.Contract;
-using DirectoryService.Presentation.EndpointResults;
+using Shared.Framework.EndpointResults;
 using DirectoryService.Presentation.Requests;
 using Microsoft.AspNetCore.Mvc;
 

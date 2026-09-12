@@ -1,6 +1,8 @@
-﻿using SharedKernel;
+using Microsoft.AspNetCore.Http;
+using Shared.Framework;
+using SharedKernel;
 
-namespace DirectoryService.Presentation.EndpointResults;
+namespace Shared.Framework.EndpointResults;
 
 public sealed class ErrorsResult : IResult
 {

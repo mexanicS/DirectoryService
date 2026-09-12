@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Application.Database;
+namespace Shared.Core.Transactions;
 
 public interface ITransactionManager
 {

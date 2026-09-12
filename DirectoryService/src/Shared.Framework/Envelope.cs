@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using SharedKernel;
 
-namespace SharedKernel;
+namespace Shared.Framework;
 
 public class Envelope
 {

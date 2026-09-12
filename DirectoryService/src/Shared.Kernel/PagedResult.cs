@@ -1,4 +1,4 @@
-namespace DirectoryService.Contract;
+namespace SharedKernel;
 
 public record PagedResult<T>(
     IReadOnlyCollection<T> Items,
