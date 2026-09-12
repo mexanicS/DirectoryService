@@ -8,7 +8,6 @@
         <Version>0.1.0</Version>
         <Authors>mexanicS</Authors>
         <Description>Shared error and result primitives for .NET services.</Description>
-        <RepositoryUrl>https://github.com/mexanicS/DirectoryService</RepositoryUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
