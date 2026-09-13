@@ -1,8 +1,6 @@
 using Shared.Core.Transactions;
 using System.Data;
 using CSharpFunctionalExtensions;
-
-using DirectoryService.Application.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;

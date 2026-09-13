@@ -2,9 +2,6 @@ using Shared.Core.Transactions;
 using System.Data;
 using System.Data.Common;
 using CSharpFunctionalExtensions;
-
-using DirectoryService.Application.Database;
-
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 

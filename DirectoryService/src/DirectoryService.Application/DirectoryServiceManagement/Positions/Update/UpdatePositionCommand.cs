@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DirectoryService.Application.DirectoryServiceManagement.Positions.Update;
+﻿namespace DirectoryService.Application.DirectoryServiceManagement.Positions.Update;
 
 public record UpdatePositionCommand(
     Guid PositionId,

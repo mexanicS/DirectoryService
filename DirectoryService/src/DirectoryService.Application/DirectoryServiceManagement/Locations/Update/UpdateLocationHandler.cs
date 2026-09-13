@@ -1,9 +1,5 @@
 using Shared.Core.Transactions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.Database;
 using DirectoryService.Application.Validation;
 using DirectoryService.Domain.Locations;
 using FluentValidation;

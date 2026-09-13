@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
+﻿namespace DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 
 public record DepartmentAndLocationCommand(
     Guid DepartmentId,

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
+﻿namespace DirectoryService.Application.DirectoryServiceManagement.Departments.Update;
 
 public record UpdateDepartmentCommand(
     Guid DepartmentId,

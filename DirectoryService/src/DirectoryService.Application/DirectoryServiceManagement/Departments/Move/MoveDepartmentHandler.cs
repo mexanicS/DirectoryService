@@ -1,8 +1,6 @@
 using Shared.Core.Transactions;
-using System.Data;
 using System.Data.Common;
 using CSharpFunctionalExtensions;
-using DirectoryService.Application.Database;
 using DirectoryService.Application.Validation;
 using DirectoryService.Contract;
 using DirectoryService.Domain.Departments;

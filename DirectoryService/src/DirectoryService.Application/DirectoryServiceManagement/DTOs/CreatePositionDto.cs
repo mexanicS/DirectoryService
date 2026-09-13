@@ -1,5 +1,3 @@
-using System;
-
 namespace DirectoryService.Application.DirectoryServiceManagement.DTOs;
 
 public record CreatePositionDto(

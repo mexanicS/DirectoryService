@@ -1,9 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Dapper;
 using DirectoryService.Application.Database;
-using DirectoryService.Application.DirectoryServiceManagement.Departments.GetDepartmentsHierarchyLtree;
 using DirectoryService.Contract;
-using FluentValidation;
 using SharedKernel;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetRootNodeDepartment;

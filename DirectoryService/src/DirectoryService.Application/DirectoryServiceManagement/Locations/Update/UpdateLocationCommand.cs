@@ -1,4 +1,3 @@
-using System;
 using DirectoryService.Application.DirectoryServiceManagement.DTOs;
 
 namespace DirectoryService.Application.DirectoryServiceManagement.Locations.Update;

@@ -1,4 +1,3 @@
-using DirectoryService.Application.DirectoryServiceManagement.Departments.GetById;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetAncestorsByPath;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetDirectChildrenByNode;
 using DirectoryService.Application.DirectoryServiceManagement.DepartmentTree.GetNodesByName;

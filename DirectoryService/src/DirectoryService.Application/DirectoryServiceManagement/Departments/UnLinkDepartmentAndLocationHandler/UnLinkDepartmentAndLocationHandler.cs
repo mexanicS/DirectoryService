@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.DirectoryServiceManagement.Departments.LinkDepartmentAndLocation;
 using DirectoryService.Application.DirectoryServiceManagement.Locations;
 using DirectoryService.Application.Validation;
