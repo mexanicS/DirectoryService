@@ -1,0 +1,35 @@
+name: Verify shared package restore
+
+on:
+  push:
+    branches: [main, codex/use-shared-packages]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: DirectoryService
+    env:
+      NuGetPackageSourceCredentials_github: Username=mexanicS;Password=${{ secrets.GH_PACKAGES_PAT }};ValidAuthenticationTypes=Basic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Require package token
+        env:
+          PACKAGE_TOKEN: ${{ secrets.GH_PACKAGES_PAT }}
+        run: |
+          if [[ -z "$PACKAGE_TOKEN" ]]; then
+            echo "Set GH_PACKAGES_PAT to restore private shared packages" >&2
+            exit 1
+          fi
+      - name: Restore DirectoryService from GitHub Packages
+        run: dotnet restore src/DirectoryService.Presentation/DirectoryService.Presentation.csproj --configfile nuget.config
+      - name: Build DirectoryService
+        run: dotnet build src/DirectoryService.Presentation/DirectoryService.Presentation.csproj --configuration Release --no-restore

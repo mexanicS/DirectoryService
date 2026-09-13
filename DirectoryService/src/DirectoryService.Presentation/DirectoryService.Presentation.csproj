@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MexanicS.SharedFramework" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
           <PrivateAssets>all</PrivateAssets>
@@ -32,7 +33,6 @@
       <ProjectReference Include="..\DirectoryService.Application\DirectoryService.Application.csproj" />
       <ProjectReference Include="..\DirectoryService.Contract\DirectoryService.Contract.csproj" />
       <ProjectReference Include="..\DirectoryService.Infrastructure\DirectoryService.Infrastructure.csproj" />
-      <ProjectReference Include="..\Shared.Framework\Shared.Framework.csproj" />
     </ItemGroup>
 
 </Project>

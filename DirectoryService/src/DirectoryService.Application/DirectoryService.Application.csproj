@@ -9,11 +9,11 @@
     <ItemGroup>
       <ProjectReference Include="..\DirectoryService.Contract\DirectoryService.Contract.csproj" />
       <ProjectReference Include="..\DirectoryService.Domain\DirectoryService.Domain.csproj" />
-      <ProjectReference Include="..\Shared.Core\Shared.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Dapper" Version="2.1.66" />
+      <PackageReference Include="MexanicS.SharedCore" Version="0.1.0" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
