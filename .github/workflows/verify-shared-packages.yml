@@ -2,7 +2,7 @@ name: Verify shared package restore
 
 on:
   push:
-    branches: [main, codex/use-shared-packages]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
             echo "Set GH_PACKAGES_PAT to restore private shared packages" >&2
             exit 1
           fi
-      - name: Restore DirectoryService from GitHub Packages
-        run: dotnet restore src/DirectoryService.Presentation/DirectoryService.Presentation.csproj --configfile nuget.config
-      - name: Build DirectoryService
-        run: dotnet build src/DirectoryService.Presentation/DirectoryService.Presentation.csproj --configuration Release --no-restore
+      - name: Restore solution from GitHub Packages
+        run: dotnet restore DirectoryService.sln --configfile nuget.config
+      - name: Build solution
+        run: dotnet build DirectoryService.sln --configuration Release --no-restore
