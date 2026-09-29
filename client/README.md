@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Directory Service client
 
-## Getting Started
+Минимальный фронтенд админки на Next.js App Router, TypeScript, Tailwind CSS и shadcn/ui.
 
-First, run the development server:
+## Запуск
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+    npm install
+    npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Главная страница: http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Проверки:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    npm run lint
+    npm run build
 
-## Learn More
+## Структура
 
-To learn more about Next.js, take a look at the following resources:
+- src/app — маршруты, корневой layout и глобальные стили.
+- src/widgets — блоки интерфейса страниц.
+- src/features — пользовательские действия и их состояние.
+- src/entities — типы и логика предметных сущностей.
+- src/shared/ui — компоненты shadcn/ui.
+- src/shared/lib — общие утилиты, включая cn.
+- src/shared/config/routes.ts — пути страниц.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Импорты идут от верхних слоёв к нижним: app → widgets → features → entities → shared. Нижний слой не импортирует верхний.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Для добавления компонента shadcn/ui используйте npx shadcn@latest add <component>: пути генерации настроены в components.json на src/shared/ui.
