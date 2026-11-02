@@ -14,7 +14,7 @@ async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
   }
 
   const query = params.size > 0 ? "?" + params.toString() : "";
-  const url = API_BASE_PATH + "/" + endpoint + "/" + query;
+  const url = API_BASE_PATH + "/" + endpoint + query;
   let response: Response;
 
   try {
