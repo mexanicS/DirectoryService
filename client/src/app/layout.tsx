@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { MobileNavigationProvider } from "@/features/mobile-navigation";
 import { Header } from "@/widgets/header";
 import { Sidebar } from "@/widgets/sidebar";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,13 +28,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={geistSans.variable + " " + geistMono.variable + " dark h-full antialiased"}
     >
       <body className="min-h-full">
-        <MobileNavigationProvider>
-          <Header />
-          <div className="flex min-h-[calc(100vh-4rem)]">
-            <Sidebar />
-            <div className="min-w-0 flex-1">{children}</div>
-          </div>
-        </MobileNavigationProvider>
+        <Providers>
+          <MobileNavigationProvider>
+            <Header />
+            <div className="flex min-h-[calc(100vh-4rem)]">
+              <Sidebar />
+              <div className="min-w-0 flex-1">{children}</div>
+            </div>
+          </MobileNavigationProvider>
+        </Providers>
       </body>
     </html>
   );
