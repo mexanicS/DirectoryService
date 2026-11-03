@@ -1,8 +1,20 @@
+export type ApiErrorDetail = {
+  code: string;
+  message: string;
+  type: number;
+  invalidField?: string | null;
+};
+
 export type ApiEnvelope<T> = {
   result: T | null;
-  errorList: unknown[] | null;
+  errorList: ApiErrorDetail[] | null;
   isError: boolean;
   timeGenerated: string;
+};
+
+export type PaginationParams = {
+  page?: number;
+  pageSize?: number;
 };
 
 export type PagedResult<T> = {
