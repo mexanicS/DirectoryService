@@ -68,6 +68,11 @@ docker compose up --detach --wait --wait-timeout 180
 - Nginx ждёт healthy backend и frontend.
 - Ошибка миграций выводится в логи и завершает backend с ненулевым кодом.
 
+Браузер отправляет API-запросы на относительный адрес `/api/...` того же origin.
+`NEXT_PUBLIC_API_URL` задаёт адрес backend только для rewrite при `npm run dev`.
+В production frontend использует `/api` без build-аргумента с адресом backend;
+запросы маршрутизирует nginx.
+
 Backend собирается в SDK-stage, запускается в ASP.NET runtime-stage.
 Frontend собирается через `npm ci` и production build, затем запускает готовый
 Next.js standalone server. При старте контейнеров сборка приложений не выполняется.
@@ -181,5 +186,4 @@ docker compose --profile monitoring down --volumes
 
 Старый вариант инфраструктуры для backend, запускаемого на host через `dotnet run`,
 сохранён в `DirectoryService/docker-compose.legacy.yml`.
-Подробнее: [мониторинг](DirectoryService/monitoring/README.md),
-[план и результаты проверок](DirectoryService/docs/docker-compose-local-plan.md).
+Подробнее: [мониторинг](DirectoryService/monitoring/README.md).

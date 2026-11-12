@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { API_BASE_PATH, BACKEND_API_URL } from "@/shared/api/config";
+import { API_BASE_PATH } from "@/shared/api/config";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -10,10 +10,14 @@ const nextConfig: NextConfig = {
       return [];
     }
 
+    const backendApiUrl = (
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5128/api/"
+    ).replace(/\/+$/, "") + "/";
+
     return [
       {
         source: API_BASE_PATH + "/:path*",
-        destination: BACKEND_API_URL + ":path*",
+        destination: backendApiUrl + ":path*",
       },
     ];
   },

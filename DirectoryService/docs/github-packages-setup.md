@@ -1,7 +1,7 @@
 # Проверка доступа к GitHub Packages
 
-Часть этапа 1 плана Docker Compose. Решение от 2026-11-12: пакеты `MexanicS.*`
-остаются в GitHub Packages, настройка токена перед первым запуском допускается.
+Пакеты `MexanicS.*` загружаются из GitHub Packages. Перед первой сборкой нужно
+настроить токен пользователя, имеющего доступ к этим пакетам.
 
 ## 1. Подготовить токен
 
@@ -30,19 +30,19 @@ Tokens (classic), либо перейди на [страницу создани�
 `GITHUB_USERNAME` и `GITHUB_PACKAGES_TOKEN`, затем выполните `docker compose up`.
 Docker build использует эти значения для restore внутри SDK-stage.
 
-Открой обычный PowerShell в своей пользовательской сессии и выполни, заменив
+Открой PowerShell в корне репозитория и выполни, заменив
 `YOUR_GITHUB_LOGIN` на логин владельца токена:
 
 ```powershell
-& 'F:\Work\DirectoryService\DirectoryService\scripts\restore-with-github-packages.ps1' -GitHubUsername YOUR_GITHUB_LOGIN
+& './DirectoryService/scripts/restore-with-github-packages.ps1' -GitHubUsername YOUR_GITHUB_LOGIN
 ```
 
 Когда появится `GitHub PAT classic with read:packages (hidden input)`, вставь токен
 и нажми Enter. Скрипт использует существующий источник `github` из
-`F:/Work/DirectoryService/DirectoryService/nuget.config`.
+`DirectoryService/nuget.config` относительно корня репозитория.
 
 Для каждого запуска скрипт создаёт новый каталог внутри
-`F:/Work/DirectoryService/DirectoryService/artifacts/nuget-restore-check`. Пакеты,
+`DirectoryService/artifacts/nuget-restore-check`. Пакеты,
 HTTP/plugin cache и файлы restore изолированы от обычной рабочей сборки. NuGet
 получает только конфигурацию репозитория и заново разрешает зависимости solution.
 
@@ -71,10 +71,7 @@ Restore succeeded with the repository config and a fresh package directory.
 Не включай диагностический вывод MSBuild (`-v:diag`) при передаче логов с credentials
 в окружении: такой вывод может содержать значения переменных.
 
-## Следующие действия
-
-После успешного restore отмечаем проверку в плане и переходим к версии
-`dotnet-ef`, проверке расхождений модели и созданию новой миграции.
+## Использование с Docker Compose
 
 Токен подключён к Docker build через
 [BuildKit secrets](https://docs.docker.com/build/building/secrets/) только на шаге
