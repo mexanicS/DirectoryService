@@ -6,6 +6,7 @@ using DirectoryService.Presentation.Controllers.LocationsController;
 using DirectoryService.Presentation.Controllers.PositionsController;
 using Shared.Framework.Middlewares;
 using DirectoryService.Presentation.Observability;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
@@ -47,6 +48,26 @@ builder.Services.AddHttpLogging(o =>
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+{
+    try
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider
+            .GetRequiredService<DirectoryServiceDbContext>();
+
+        Log.Information("Applying database migrations");
+        await dbContext.Database.MigrateAsync();
+        Log.Information("Database migrations applied");
+    }
+    catch (Exception exception)
+    {
+        Log.Fatal(exception, "Database migration failed. Backend startup aborted");
+        await Log.CloseAndFlushAsync();
+        throw;
+    }
+}
+
 app.UseExceptionMiddleware();
 app.UseSerilogRequestLogging();
 
@@ -59,6 +80,18 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.MapDirectoryServiceMetrics();
+
+app.MapGet("/health/ready", async (
+    DirectoryServiceDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    var canConnect = await dbContext.Database
+        .CanConnectAsync(cancellationToken);
+
+    return canConnect
+        ? Results.Ok(new { status = "ready" })
+        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+});
 
 app.Run();
 

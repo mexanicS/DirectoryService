@@ -1,0 +1,31 @@
+# Зависимости и результаты сборки
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Локальные настройки, логи и кэш
+.env*
+**/.env*
+**/*.log
+**/*.log.*
+**/*.tsbuildinfo
+next-env.d.ts
+
+# Git и IDE
+.git/
+.github/
+.idea/
+.vscode/
+.vs/
+.DS_Store
+Thumbs.db
+
+# Тесты и документация
+tests/
+docs/
+README.md
+AGENTS.md
+CLAUDE.md

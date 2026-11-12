@@ -1,0 +1,29 @@
+# Результаты сборки и проверок
+**/bin/
+**/obj/
+artifacts/
+**/TestResults/
+coverage/
+
+# Git и IDE
+**/.git/
+.github/
+**/.vs/
+**/.idea/
+**/.vscode/
+.qodo/
+**/*.user
+**/*.suo
+**/*.DotSettings.user
+
+# Локальные настройки и временные файлы
+.env*
+**/.env*
+**/*.log
+**/*.tmp
+
+# Не нужны для публикации backend
+Tests/
+docs/
+monitoring/
+scripts/

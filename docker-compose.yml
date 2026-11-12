@@ -1,0 +1,242 @@
+name: directory-service
+
+services:
+  backend:
+    build:
+      context: ./DirectoryService
+
+      dockerfile: Dockerfile
+
+      args:
+        GITHUB_USERNAME: "${GITHUB_USERNAME:?Set GITHUB_USERNAME in .env}"
+
+      secrets:
+        - github_packages_token
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:?Set ASPNETCORE_ENVIRONMENT in .env}"
+      ASPNETCORE_HTTP_PORTS: "${BACKEND_PORT:?Set BACKEND_PORT in .env}"
+      ConnectionStrings__Database: "Host=postgres;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__Seq: "${SEQ_URL:?Set SEQ_URL in .env}"
+      Database__ApplyMigrations: "true"
+
+    networks:
+      - directory-service
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "2", "http://127.0.0.1:${BACKEND_PORT}/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+
+    environment:
+      NODE_ENV: production
+      PORT: "${FRONTEND_PORT:?Set FRONTEND_PORT in .env}"
+      HOSTNAME: "0.0.0.0"
+
+    networks:
+      - directory-service
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - --eval
+        - >-
+          fetch('http://127.0.0.1:' + process.env.PORT,
+            { signal: AbortSignal.timeout(2000) })
+            .then(response => process.exit(response.status === 200 ? 0 : 1))
+            .catch(() => process.exit(1))
+
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+
+  seq:
+    image: datalust/seq:2026.1.17526
+
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+
+    volumes:
+      - seq-data:/data
+
+    networks:
+      - directory-service
+
+
+  postgres:
+    image: postgres:17
+
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:?Set POSTGRES_DB in .env}"
+      POSTGRES_USER: "${POSTGRES_USER:?Set POSTGRES_USER in .env}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+
+    command:
+      - postgres
+      - -p
+      - "${POSTGRES_PORT:?Set POSTGRES_PORT in .env}"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    networks:
+      - directory-service
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "${POSTGRES_PORT}", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+
+  nginx:
+    image: nginx:1.30.6-alpine
+
+    ports:
+      - "127.0.0.1:${HTTP_PORT:?Set HTTP_PORT in .env}:80"
+
+    environment:
+      BACKEND_PORT: "${BACKEND_PORT:?Set BACKEND_PORT in .env}"
+      FRONTEND_PORT: "${FRONTEND_PORT:?Set FRONTEND_PORT in .env}"
+      NGINX_ENVSUBST_FILTER: "BACKEND_PORT|FRONTEND_PORT"
+
+    volumes:
+      - type: bind
+        source: ./nginx/default.conf.template
+        target: /etc/nginx/templates/default.conf.template
+        read_only: true
+        bind:
+          create_host_path: false
+
+    networks:
+      - directory-service
+
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "2", "--spider", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v3.13.1
+
+    profiles: [monitoring]
+
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.external-url=http://localhost:${HTTP_PORT}/prometheus/
+      - --web.route-prefix=/
+
+    configs:
+      - source: prometheus-config
+        target: /etc/prometheus/prometheus.yml
+
+    volumes:
+      - prometheus-data:/prometheus
+      - type: bind
+        source: ./DirectoryService/monitoring/prometheus/alerts.yml
+        target: /etc/prometheus/alerts.yml
+        read_only: true
+        bind:
+          create_host_path: false
+
+    networks:
+      - directory-service
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+
+  grafana:
+    image: grafana/grafana:13.1.0
+
+    profiles: [monitoring]
+
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:?Set GRAFANA_ADMIN_USER in .env}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: "http://localhost:${HTTP_PORT}/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+      - type: bind
+        source: ./DirectoryService/monitoring/grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+        bind:
+          create_host_path: false
+
+      - type: bind
+        source: ./DirectoryService/monitoring/grafana/dashboards
+        target: /var/lib/grafana/dashboards
+        read_only: true
+        bind:
+          create_host_path: false
+
+    networks:
+      - directory-service
+
+    depends_on:
+      prometheus:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  seq-data:
+  prometheus-data:
+  grafana-data:
+
+
+networks:
+  directory-service:
+    driver: bridge
+
+secrets:
+  github_packages_token:
+    environment: GITHUB_PACKAGES_TOKEN
+
+configs:
+  prometheus-config:
+    content: |
+      global:
+        scrape_interval: 15s
+        evaluation_interval: 15s
+      rule_files:
+        - /etc/prometheus/alerts.yml
+      scrape_configs:
+        - job_name: directory-service
+          metric_name_validation_scheme: legacy
+          metrics_path: /metrics
+          static_configs:
+            - targets: ["backend:${BACKEND_PORT:?Set BACKEND_PORT in .env}"]
