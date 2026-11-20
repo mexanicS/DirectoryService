@@ -1,0 +1,6 @@
+﻿@FileService_HostAddress = http://localhost:5255
+
+GET {{FileService_HostAddress}}/health/live
+Accept: application/json
+
+###
