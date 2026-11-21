@@ -92,6 +92,9 @@ services:
       - -p
       - "${POSTGRES_PORT:?Set POSTGRES_PORT in .env}"
 
+    ports:
+      - "127.0.0.1:55432:${POSTGRES_PORT}"
+
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -210,6 +213,33 @@ services:
     depends_on:
       prometheus:
         condition: service_started
+
+
+  file-service:
+    build:
+      context: ./FileService/FileService
+      dockerfile: FileService.Web/Dockerfile
+      args:
+        GITHUB_USERNAME: "${GITHUB_USERNAME}"
+      secrets:
+        - github_packages_token
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT}"
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Database: "Host=postgres;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Database__ApplyMigrations: "true"
+
+    ports:
+      - "127.0.0.1:5255:8080"
+
+    networks:
+      - directory-service
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 
 volumes:
   postgres-data:
