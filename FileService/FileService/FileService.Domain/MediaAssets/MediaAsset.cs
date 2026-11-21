@@ -87,9 +87,24 @@ public sealed class MediaAsset
         FilePolicy? policy = null,
         DateTime? now = null)
     {
-        if (originalFileName is null || contentType is null || size is null || uploadedBy is null)
+        if (originalFileName is null)
         {
-            return FileErrors.Required(nameof(MediaAsset));
+            return FileErrors.Required(nameof(FileName));
+        }
+
+        if (contentType is null)
+        {
+            return FileErrors.Required(nameof(MimeType));
+        }
+
+        if (size is null)
+        {
+            return FileErrors.Required(nameof(FileSize));
+        }
+
+        if (uploadedBy is null)
+        {
+            return FileErrors.Required(nameof(UploaderId));
         }
 
         if ((draftId is null) == (entityReference is null))
@@ -185,7 +200,8 @@ public sealed class MediaAsset
             return timeValidation.Error;
         }
 
-        StorageReference = StorageReference.Confirm(actualSize, detectedContentType, checksum, etag, changedAt);
+        StorageReference.Confirm(actualSize, detectedContentType, checksum, etag, changedAt);
+
         Status = AssetStatus.UPLOADED;
         Touch(changedAt);
         return Result.Success<Error>();

@@ -37,18 +37,17 @@ public sealed class StorageReference
     internal static StorageReference Reserve(MediaAssetId mediaAssetId, StorageKey key, DateTime reservedAt) =>
         new(mediaAssetId, key, reservedAt);
 
-    internal StorageReference Confirm(
+    internal void Confirm(
         FileSize actualSize,
         MimeType detectedContentType,
         Sha256Checksum? checksum,
         ETag? etag,
-        DateTime confirmedAt) =>
-        new(MediaAssetId, Key, ReservedAt)
-        {
-            ActualSize = actualSize,
-            DetectedContentType = detectedContentType,
-            Checksum = checksum,
-            ETag = etag,
-            ConfirmedAt = confirmedAt,
-        };
+        DateTime confirmedAt)
+    {
+        ActualSize = actualSize;
+        DetectedContentType = detectedContentType;
+        Checksum = checksum;
+        ETag = etag;
+        ConfirmedAt = confirmedAt;
+    }
 }
