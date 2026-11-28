@@ -11,25 +11,16 @@ public class S3BucketInitializer(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var retrySeconds = 1;
-        var initialized = false;
 
         while (!stoppingToken.IsCancellationRequested)
         {
             var result = await storage.EnsureBucketAsync(stoppingToken);
             if (result.IsSuccess)
             {
-                if (!initialized)
-                {
-                    logger.LogInformation("Object storage bucket is initialized");
-                }
-
-                initialized = true;
-                retrySeconds = 1;
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-                continue;
+                logger.LogInformation("Object storage bucket is initialized");
+                return;
             }
 
-            initialized = false;
             logger.LogWarning(
                 "Object storage initialization failed ({ErrorCode}); retrying in {RetrySeconds} seconds",
                 result.Error.Code,

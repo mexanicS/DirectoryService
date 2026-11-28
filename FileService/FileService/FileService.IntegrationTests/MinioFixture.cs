@@ -18,10 +18,15 @@ public class MinioFixture : IAsyncLifetime
         var configuredPath = Environment.GetEnvironmentVariable("MINIO_LICENSE_PATH");
         var solutionDirectory = CommonDirectoryPath.GetSolutionDirectory().DirectoryPath;
         var repositoryRoot = Directory.GetParent(solutionDirectory)!.Parent!.FullName;
-        var licensePath = Path.GetFullPath(configuredPath ?? ".secrets/minio.license", repositoryRoot);
+        var licensePath = Path.GetFullPath(
+            string.IsNullOrWhiteSpace(configuredPath) ? ".secrets/minio.license" : configuredPath,
+            repositoryRoot);
         if (!File.Exists(licensePath))
         {
-            throw new InvalidOperationException("AIStor integration tests require a license file. Set MINIO_LICENSE_PATH.");
+            throw new InvalidOperationException(
+                "S3 integration tests require an AIStor license file. Set MINIO_LICENSE_PATH " +
+                "or place the license at .secrets/minio.license in the repository root. " +
+                "For a run without S3 integration tests, explicitly use --filter \"Category!=S3\".");
         }
 
         AccessKey = "fs-test-" + Guid.NewGuid().ToString("N")[..12];

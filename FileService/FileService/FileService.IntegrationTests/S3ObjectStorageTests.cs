@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FileService.IntegrationTests;
 
+[Trait("Category", "S3")]
 public class S3ObjectStorageTests(MinioFixture fixture) : IClassFixture<MinioFixture>
 {
     [Fact]

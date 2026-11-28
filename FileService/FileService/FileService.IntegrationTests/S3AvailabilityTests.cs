@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace FileService.IntegrationTests;
 
+[Trait("Category", "S3")]
 public class S3AvailabilityTests
 {
     [Fact]
