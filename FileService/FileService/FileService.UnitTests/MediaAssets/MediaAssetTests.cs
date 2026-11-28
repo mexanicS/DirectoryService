@@ -153,7 +153,7 @@ public class MediaAssetTests
         Assert.Equal(etag, confirmed.ETag);
         Assert.Equal(reservation.ReservedAt, confirmed.ReservedAt);
         Assert.Equal(CreatedAt.AddSeconds(2), confirmed.ConfirmedAt);
-        Assert.False(reservation.IsConfirmed);
+        Assert.Same(reservation, confirmed);
         Assert.True(asset.MarkReady(CreatedAt.AddSeconds(3)).IsSuccess);
         Assert.True(asset.IsTemporary);
     }

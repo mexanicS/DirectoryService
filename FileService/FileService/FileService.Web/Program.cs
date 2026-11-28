@@ -1,10 +1,14 @@
 ﻿using FileService.Infrastructure.Postgres;
+using FileService.Infrastructure.S3;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddS3Storage(builder.Configuration);
+builder.Services.AddHealthChecks().AddDbContextCheck<FileServiceDbContext>("postgres", tags: ["ready"]);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -33,5 +37,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready"),
+});
 
 app.Run();

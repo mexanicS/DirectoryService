@@ -10,4 +10,11 @@
       <ProjectReference Include="..\FileService.Core\FileService.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.S3" Version="4.1.2" />
+      <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.8" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.8" />
+    </ItemGroup>
+
 </Project>

@@ -229,6 +229,17 @@ services:
       ASPNETCORE_HTTP_PORTS: "8080"
       ConnectionStrings__Database: "Host=postgres;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       Database__ApplyMigrations: "true"
+      S3__Endpoint: "${S3_ENDPOINT:-http://minio:9000}"
+      S3__PublicEndpoint: "${S3_PUBLIC_ENDPOINT:-http://localhost:${MINIO_API_PORT:-19000}}"
+      S3__Region: "${S3_REGION:-us-east-1}"
+      S3__BucketName: "${S3_BUCKET_NAME:-files}"
+      S3__AccessKey: "${S3_ACCESS_KEY:-${MINIO_ROOT_USER}}"
+      S3__SecretKey: "${S3_SECRET_KEY:-${MINIO_ROOT_PASSWORD}}"
+      S3__ForcePathStyle: "true"
+      S3__CreateBucketIfMissing: "true"
+      S3__PresignedUrlTtl: "${S3_PRESIGNED_URL_TTL:-00:15:00}"
+      S3__RequestTimeout: "00:00:10"
+      S3__HealthCheckTimeout: "00:00:02"
 
     ports:
       - "127.0.0.1:5255:8080"
@@ -241,7 +252,41 @@ services:
         condition: service_healthy
 
 
+  minio:
+    image: quay.io/minio/aistor/minio:latest
+
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}"
+
+    command: ["minio", "server", "/data", "--console-address", ":9001", "--license", "/minio.license"]
+
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-19000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-19001}:9001"
+
+    volumes:
+      - minio-data:/data
+      - type: bind
+        source: "${MINIO_LICENSE_PATH:-./.secrets/minio.license}"
+        target: /minio.license
+        read_only: true
+        bind:
+          create_host_path: false
+
+    networks:
+      - directory-service
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "2", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+
+
 volumes:
+  minio-data:
   postgres-data:
   seq-data:
   prometheus-data:

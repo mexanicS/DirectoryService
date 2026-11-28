@@ -15,4 +15,8 @@
       <PackageReference Include="MexanicS.SharedCore" Version="0.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ObjectStorage\" />
+    </ItemGroup>
+
 </Project>
