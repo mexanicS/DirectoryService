@@ -147,7 +147,7 @@ public sealed class MediaAsset
             return timeValidation.Error;
         }
 
-        StorageReference = FileService.Domain.StorageReferences.StorageReference.Reserve(Id, key, changedAt);
+        StorageReference = StorageReference.Reserve(Id, key, changedAt);
         Status = AssetStatus.UPLOADING;
         Touch(changedAt);
         return Result.Success<Error>();

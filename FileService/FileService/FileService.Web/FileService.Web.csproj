@@ -11,12 +11,14 @@
     <ItemGroup>
         <PackageReference Include="MexanicS.SharedFramework" Version="0.1.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.8" />
         <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\FileService.Core\FileService.Core.csproj" />
       <ProjectReference Include="..\FileService.Infrastructure.Postgres\FileService.Infrastructure.Postgres.csproj" />
+      <ProjectReference Include="..\FileService.Infrastructure.S3\FileService.Infrastructure.S3.csproj" />
     </ItemGroup>
 
     <ItemGroup>
